@@ -1,16 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { Footer } from "@/components/Landing/Footer";
 import { PageWrapper } from "@/components/Layout/PageWrapper";
+import { Button } from "@/components/ui/button";
 
 export function TermsOfService() {
+  const navigate = useNavigate();
+
   return (
     <PageWrapper>
       <div className="cross-rule min-h-screen">
         <div className="mx-auto max-w-4xl px-6 pt-24 md:px-10">
-          <Link to="/" aria-label="Refactly home" className="inline-block">
-            <BrandLogo size="md" showDescriptor={false} />
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link to="/" aria-label="Refactly home" className="inline-block">
+              <BrandLogo size="md" showDescriptor={false} />
+            </Link>
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              &larr; Back
+            </Button>
+          </div>
           <h1 className="mt-12 text-5xl text-charcoal-dark md:text-6xl">Terms of Service</h1>
           <p className="mt-3 font-mono text-2xs uppercase tracking-[0.24em] text-gold">Last updated: 26 May 2026</p>
 
