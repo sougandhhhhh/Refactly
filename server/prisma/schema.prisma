@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  avatar    String?
+  createdAt DateTime  @default(now())
+  sessions  Session[]
+  comments  Comment[]
+}
+
+model Session {
+  id         String    @id @default(cuid())
+  title      String
+  language   String    @default("javascript")
+  code       String    @db.Text
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  ownerId    String
+  owner      User      @relation(fields: [ownerId], references: [id])
+  reviews    Review[]
+  comments   Comment[]
+  isPublic   Boolean   @default(false)
+  shareToken String?   @unique
+}
+
+model Review {
+  id             String   @id @default(cuid())
+  sessionId      String
+  session        Session  @relation(fields: [sessionId], references: [id])
+  aiSuggestions  Json
+  securityIssues Json
+  complexity     Json
+  codeSmells     Json
+  score          Int
+  summary        String   @db.Text
+  createdAt      DateTime @default(now())
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  line      Int
+  content   String
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
