@@ -24,7 +24,7 @@ function getPasswordStrength(password: string) {
 export function SignUp() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signInWithCredentials, signInWithGoogle } = useAuth();
+  const { signInWithGoogle } = useAuth();
   const redirect = new URLSearchParams(location.search).get("redirect") || "/verify-email";
 
   const [firstName, setFirstName] = useState("");
@@ -79,15 +79,13 @@ export function SignUp() {
 
     try {
       setLoading(true);
-      const result = await signUpRequest({
+      await signUpRequest({
         firstName,
         lastName,
         email,
         password,
         acceptedTerms: agreeTerms,
       });
-      const userName = result.userName || `${firstName} ${lastName}`.trim();
-      signInWithCredentials({ name: userName, email });
       showOldMoneyToast("Account created successfully.");
       navigate(redirect, { replace: true });
     } catch (error) {

@@ -1,3 +1,5 @@
+import { supabase } from "./supabase";
+
 type SignInPayload = {
   email: string;
   password: string;
@@ -18,38 +20,40 @@ type AuthResult = {
   userName?: string;
 };
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-async function postJson<T>(url: string, body: unknown): Promise<T> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
+export async function signInRequest(payload: SignInPayload): Promise<AuthResult> {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: payload.email,
+    password: payload.password,
   });
 
-  const data = await response.json().catch(() => ({}));
+  if (error) throw new Error(error.message);
 
-  if (!response.ok) {
-    const message =
-      typeof data?.message === "string" ? data.message :
-      typeof data?.error === "string" ? data.error :
-      "Authentication request failed.";
-    throw new Error(message);
-  }
+  const userName =
+    data.user?.user_metadata?.name ||
+    data.user?.email?.split("@")[0] ||
+    "";
 
-  return data as T;
-}
-
-export async function signInRequest(payload: SignInPayload): Promise<AuthResult> {
-  return postJson<AuthResult>(`${API_BASE}/auth/login`, payload);
+  return { ok: true, userName };
 }
 
 export async function signUpRequest(payload: SignUpPayload): Promise<AuthResult> {
-  return postJson<AuthResult>(`${API_BASE}/auth/signup`, payload);
-}
+  const { data, error } = await supabase.auth.signUp({
+    email: payload.email,
+    password: payload.password,
+    options: {
+      emailRedirectTo: `${window.location.origin}/auth/callback`,
+      data: {
+        name: `${payload.firstName} ${payload.lastName}`.trim(),
+      },
+    },
+  });
 
-import { supabase } from "./supabase";
+  if (error) throw new Error(error.message);
+
+  const userName = `${payload.firstName} ${payload.lastName}`.trim();
+
+  return { ok: true, userName };
+}
 
 export async function startGoogleOAuth() {
   const { error } = await supabase.auth.signInWithOAuth({
@@ -58,7 +62,5 @@ export async function startGoogleOAuth() {
       redirectTo: `${window.location.origin}/auth/callback`,
     },
   });
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
 }

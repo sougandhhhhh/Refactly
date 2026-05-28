@@ -15,7 +15,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function SignIn() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signInWithCredentials, signInWithGoogle } = useAuth();
+  const { signInWithGoogle } = useAuth();
   const redirect = new URLSearchParams(location.search).get("redirect") || "/dashboard";
 
   const [email, setEmail] = useState("");
@@ -51,9 +51,7 @@ export function SignIn() {
 
     try {
       setLoading(true);
-      const result = await signInRequest({ email, password, rememberMe });
-      const userName = result.userName || email.split("@")[0];
-      signInWithCredentials({ name: userName, email });
+      await signInRequest({ email, password, rememberMe });
       showOldMoneyToast("Signed in successfully.");
       navigate(redirect, { replace: true });
     } catch (error) {
