@@ -107,7 +107,7 @@ export function SignUp() {
         <p className="eyebrow mt-3">Sign Up</p>
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/signin")}
           className="absolute right-6 top-6 font-mono text-2xs uppercase tracking-[0.16em] text-gold hover:text-gold-dark sm:right-10 sm:top-10"
         >
           ← Back

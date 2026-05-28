@@ -73,7 +73,7 @@ export function SignIn() {
         <p className="eyebrow mt-3">Sign In</p>
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="absolute right-5 top-5 font-mono text-2xs uppercase tracking-[0.16em] text-gold hover:text-gold-dark sm:right-7 sm:top-7"
         >
           ← Back

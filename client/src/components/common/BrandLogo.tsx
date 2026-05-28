@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
   className?: string;
+  wordClassName?: string;
   theme?: "light" | "dark";
   size?: "sm" | "md" | "lg";
   showDescriptor?: boolean;
@@ -28,6 +29,7 @@ const sizeMap = {
 
 export function BrandLogo({
   className,
+  wordClassName,
   theme = "light",
   size = "md",
   showDescriptor = true,
@@ -73,7 +75,7 @@ export function BrandLogo({
         </svg>
       </div>
       <div className="min-w-0">
-        <div className={cn("font-display tracking-[0.18em]", sizeMap[size].wordmark, palette.word)}>REFACTLY</div>
+        <div className={cn("font-display tracking-[0.18em]", sizeMap[size].wordmark, palette.word, wordClassName)}>REFACTLY</div>
         {showDescriptor ? (
           <div className={cn("font-mono uppercase tracking-[0.26em]", sizeMap[size].descriptor, palette.sub)}>
             Editorial Code Review
