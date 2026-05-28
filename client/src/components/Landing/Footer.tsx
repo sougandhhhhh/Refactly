@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex flex-col justify-between gap-10 border-b border-gold-muted/20 pb-8 md:flex-row md:items-end">
           <div>
             <Link to="/" onClick={() => window.scrollTo(0, 0)} aria-label="Refactly home">
-              <BrandLogo theme="dark" size="md" showDescriptor={false} />
+              <BrandLogo size="md" showDescriptor={false} />
             </Link>
             <div className="divider-gold" />
             <p className="max-w-sm text-lg text-cream-50/70">
