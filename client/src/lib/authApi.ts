@@ -49,17 +49,16 @@ export async function signUpRequest(payload: SignUpPayload): Promise<AuthResult>
   return postJson<AuthResult>(`${API_BASE}/auth/signup`, payload);
 }
 
+import { supabase } from "./supabase";
+
 export async function startGoogleOAuth() {
-  const res = await fetch(`${API_BASE}/api/auth/csrf`, { credentials: "include" });
-  const { csrfToken } = await res.json();
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = `${API_BASE}/api/auth/signin/google`;
-  form.style.display = "none";
-  const input = document.createElement("input");
-  input.name = "csrfToken";
-  input.value = csrfToken;
-  form.appendChild(input);
-  document.body.appendChild(form);
-  form.submit();
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
 }
