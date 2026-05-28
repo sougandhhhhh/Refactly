@@ -14,7 +14,7 @@ const editorialFeatures = [
 
 export function EditorialEngine() {
   return (
-    <section id="editorial-engine" className="flex min-h-screen items-center border-y border-stone-200 bg-stone-100/30 px-6 py-12 md:px-10">
+    <section id="editorial-engine" className="flex min-h-screen items-center border-y border-stone-200 px-6 py-12 md:px-10">
       <div className="mx-auto w-full max-w-7xl">
         <div className="text-center">
           <p className="eyebrow">Editorial Engine</p>

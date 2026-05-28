@@ -9,11 +9,13 @@ import { PageWrapper } from "@/components/Layout/PageWrapper";
 export function Landing() {
   return (
     <PageWrapper>
-      <Navbar />
-      <Hero />
-      <Features />
-      <EditorialEngine />
-      <Pricing />
+      <div className="cross-rule paper-grid">
+        <Navbar />
+        <Hero />
+        <Features />
+        <EditorialEngine />
+        <Pricing />
+      </div>
       <Footer />
     </PageWrapper>
   );

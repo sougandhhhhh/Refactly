@@ -4,7 +4,7 @@ import { staggerContainer, staggerItem } from "@/lib/data";
 
 export function Hero() {
   return (
-    <section className="cross-rule paper-grid relative min-h-screen overflow-hidden border-b border-stone-200">
+    <section className="relative min-h-screen overflow-hidden border-b border-stone-200">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-16 pt-20 md:px-10">
         <motion.div
           initial="hidden"

@@ -3,7 +3,7 @@ import { staggerContainer, staggerItem } from "@/lib/data";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="flex min-h-screen items-center border-t border-stone-200 bg-cream-50 px-6 py-12 md:px-10">
+    <section id="pricing" className="flex min-h-screen items-center border-t border-stone-200 px-6 py-12 md:px-10">
       <motion.div
         initial="hidden"
         whileInView="visible"
