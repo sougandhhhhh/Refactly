@@ -66,11 +66,6 @@ export function TermsOfService() {
             </div>
           </section>
 
-          <div className="mt-16 border-t border-stone-200 py-8 text-center">
-            <p className="text-base text-charcoal-light">
-              Contact: <span className="text-gold">legal@refactly.dev</span>
-            </p>
-          </div>
         </div>
       </div>
       <Footer />
