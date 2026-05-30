@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { showOldMoneyToast } from "@/components/common/Toast";
 import { PageWrapper } from "@/components/Layout/PageWrapper";
@@ -7,6 +9,21 @@ import { Card } from "@/components/ui/card";
 
 export function VerifyEmail() {
   const navigate = useNavigate();
+  const [sending, setSending] = useState(false);
+
+  const handleResend = async () => {
+    setSending(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: "", // The user's email would need to be stored or passed; for now this prompts
+    });
+    setSending(false);
+    if (error) {
+      showOldMoneyToast(error.message);
+    } else {
+      showOldMoneyToast("Verification email sent.");
+    }
+  };
 
   return (
     <PageWrapper className="cross-rule flex min-h-screen items-center justify-center px-4 py-10 sm:px-6">
@@ -27,9 +44,10 @@ export function VerifyEmail() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button
             className="w-full"
-            onClick={() => showOldMoneyToast("Verification email sent again.")}
+            disabled={sending}
+            onClick={handleResend}
           >
-            Resend Email
+            {sending ? "Sending..." : "Resend Email"}
           </Button>
           <Link to="/dashboard" className="w-full">
             <Button variant="ghost" className="w-full">

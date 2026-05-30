@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type PresenceAvatarProps = {
@@ -21,7 +21,9 @@ export function PresenceAvatar({ name, color, stacked = false }: PresenceAvatarP
       <Tooltip>
         <TooltipTrigger asChild>
           <motion.div layout className={stacked ? "-ml-2 first:ml-0" : ""}>
-            <Avatar initials={initials} style={{ backgroundColor: color }} />
+            <Avatar style={{ backgroundColor: color }}>
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
           </motion.div>
         </TooltipTrigger>
         <TooltipContent>{name}</TooltipContent>

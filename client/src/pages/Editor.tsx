@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { EditorToolbar } from "@/components/Editor/EditorToolbar";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { AIFeedbackPanel } from "@/components/Review/AIFeedbackPanel";
@@ -14,9 +14,19 @@ const MonacoEditorPanel = lazy(async () => {
 });
 
 export function EditorPage() {
+  const [language, setLanguage] = useState("typescript");
+  const [minimapEnabled, setMinimapEnabled] = useState(true);
+  const [activeTab, setActiveTab] = useState(tabs[0]);
+
   return (
     <AppLayout>
-      <EditorToolbar />
+      <EditorToolbar
+        language={language}
+        onLanguageChange={setLanguage}
+        minimapEnabled={minimapEnabled}
+        onMinimapToggle={() => setMinimapEnabled((v) => !v)}
+        onReviewClick={() => setActiveTab("AI Review")}
+      />
       <div className="grid min-h-[calc(100vh-64px)] xl:grid-cols-[1.55fr_1fr]">
         <div className="border-r border-stone-200 p-3 sm:p-4">
           <Suspense
@@ -31,11 +41,11 @@ export function EditorPage() {
               </div>
             }
           >
-            <MonacoEditorPanel />
+            <MonacoEditorPanel language={language} minimapEnabled={minimapEnabled} />
           </Suspense>
         </div>
         <aside className="overflow-y-auto border-t border-stone-200 bg-cream-100/80 xl:border-t-0">
-          <Tabs defaultValue={tabs[0]} className="h-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
             <div className="sticky top-0 z-10 border-b border-stone-200 bg-cream-100/95 px-6 pt-5 backdrop-blur-sm">
               <TabsList>
                 {tabs.map((item) => (

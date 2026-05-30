@@ -6,9 +6,11 @@ import { oldMoneyTheme } from "@/lib/monacoTheme";
 
 type MonacoEditorPanelProps = {
   compact?: boolean;
+  language?: string;
+  minimapEnabled?: boolean;
 };
 
-export function MonacoEditorPanel({ compact = false }: MonacoEditorPanelProps) {
+export function MonacoEditorPanel({ compact = false, language = "typescript", minimapEnabled = !compact }: MonacoEditorPanelProps) {
   const handleMount: OnMount = (editor, monaco) => {
     monaco.editor.defineTheme("old-money-theme", oldMoneyTheme);
     monaco.editor.setTheme("old-money-theme");
@@ -40,20 +42,23 @@ export function MonacoEditorPanel({ compact = false }: MonacoEditorPanelProps) {
     monaco.editor.setModelMarkers(model, "owner", markers);
   };
 
+  const langLabel = language.charAt(0).toUpperCase() + language.slice(1);
+
   return (
     <div className="card-old-money relative overflow-hidden">
       <div className="border-b border-stone-200 bg-cream-100/80 px-5 py-3 font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
-        live-review.ts
+        live-review.{language}
       </div>
       <div className={compact ? "h-[500px]" : "h-[calc(100vh-120px)]"}>
         <Editor
-          defaultLanguage="typescript"
+          key={language}
+          language={language}
           defaultValue={editorSample}
           onMount={handleMount}
           options={{
             fontFamily: "JetBrains Mono",
             fontSize: 13,
-            minimap: { enabled: !compact },
+            minimap: { enabled: minimapEnabled },
             scrollBeyondLastLine: false,
             smoothScrolling: true,
             padding: { top: 18, bottom: 18 },
@@ -65,7 +70,7 @@ export function MonacoEditorPanel({ compact = false }: MonacoEditorPanelProps) {
       </div>
       {!compact ? <CollabCursors /> : null}
       <div className="flex items-center justify-between border-t border-stone-200 bg-cream-100/80 px-5 py-2 font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
-        <span>TypeScript</span>
+        <span>{langLabel}</span>
         <span>Ln 18, Col 12</span>
         <span>2.4 KB</span>
       </div>

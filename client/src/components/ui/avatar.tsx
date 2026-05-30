@@ -1,7 +1,11 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { cn } from "@/lib/utils";
 
-export function Avatar({
+export const Avatar = AvatarPrimitive.Root;
+export const AvatarImage = AvatarPrimitive.Image;
+export const AvatarFallback = AvatarPrimitive.Fallback;
+
+export function AvatarOld({
   initials,
   className,
   style,
