@@ -66,12 +66,12 @@
   }
 
   .sidebar-scroll::-webkit-scrollbar-thumb {
-    background: #4A4440;
+    background: #7D5A1E;
     border-radius: 3px;
   }
 
   .sidebar-scroll::-webkit-scrollbar-track {
-    background: #1A1614;
+    background: #A67C2E;
   }
 
   input, textarea, select {

@@ -1,5 +1,4 @@
 import { BarChart3, ChevronLeft, ChevronRight, ClipboardCheck, LayoutGrid, LogOut, Settings, Sparkles } from "lucide-react";
-import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { showOldMoneyToast } from "@/components/common/Toast";
@@ -42,7 +41,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col justify-between bg-charcoal px-3 py-5 text-cream-50 transition-all duration-300 sidebar-scroll",
+        "flex flex-col justify-between bg-gold px-3 py-5 text-charcoal-dark transition-all duration-300 sidebar-scroll",
         collapsed ? "w-[64px]" : "w-[240px]",
       )}
     >
@@ -50,18 +49,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
           {!collapsed && (
             <Link to="/dashboard" aria-label="Refactly dashboard">
-              <BrandLogo size="sm" showDescriptor={false} wordClassName="text-cream-50" />
+              <BrandLogo size="sm" showDescriptor={false} theme="dark" />
             </Link>
           )}
           <button
             onClick={onToggle}
-            className="flex h-8 w-8 items-center justify-center rounded-sm text-cream-50/60 hover:bg-cream-50/10 hover:text-cream-50"
+            className="flex h-8 w-8 items-center justify-center rounded-sm text-charcoal-dark/60 hover:bg-charcoal-dark/10 hover:text-charcoal-dark"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
         </div>
-        <div className={cn("mt-4 h-px w-full bg-gold-muted/20", collapsed && "w-8 mx-auto")} />
+        <div className={cn("mt-4 h-px w-full bg-charcoal-dark/15", collapsed && "w-8 mx-auto")} />
         <nav className={cn("mt-4 space-y-1", collapsed && "flex flex-col items-center")}>
           {items.map(({ label, icon: Icon, href }) => {
             const active = isActive(href);
@@ -70,9 +69,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 key={label}
                 to={href}
                 className={cn(
-                  "flex items-center gap-3 rounded-sm px-3 py-3 font-body text-lg text-cream-50/78 transition-all duration-200 hover:bg-cream-50/10 hover:text-cream-50",
+                  "flex items-center gap-3 rounded-sm px-3 py-3 font-body text-lg text-charcoal-dark/70 transition-all duration-200 hover:bg-charcoal-dark/10 hover:text-charcoal-dark",
                   collapsed && "justify-center px-0",
-                  active && "bg-cream-50/10 text-cream-50",
+                  active && "bg-charcoal-dark/15 text-charcoal-dark font-medium",
                 )}
                 title={collapsed ? label : undefined}
               >
@@ -85,24 +84,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </div>
 
       <div className={cn("space-y-4", collapsed && "flex flex-col items-center")}>
-        <div className={cn("h-px w-full bg-gold-muted/20", collapsed && "w-8")} />
+        <div className={cn("h-px w-full bg-charcoal-dark/15", collapsed && "w-8")} />
         <div className={cn("flex items-center gap-3", collapsed && "flex-col")}>
           {user?.image ? (
             <img
               src={user.image}
               alt={userName}
-              className="h-9 w-9 shrink-0 rounded-sm border border-cream-50/30 object-cover"
+              className="h-9 w-9 shrink-0 rounded-sm border border-charcoal-dark/30 object-cover"
             />
           ) : (
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-charcoal-muted font-mono text-xs uppercase">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-charcoal-dark/20 font-mono text-xs uppercase text-charcoal-dark">
               {initials || "?"}
             </div>
           )}
           {!collapsed && (
             <div className="min-w-0">
-              <p className="truncate font-body text-base">{userName}</p>
+              <p className="truncate font-body text-base text-charcoal-dark">{userName}</p>
               {userEmail && (
-                <p className="truncate font-mono text-2xs uppercase tracking-[0.18em] text-cream-50/55">{userEmail}</p>
+                <p className="truncate font-mono text-2xs uppercase tracking-[0.18em] text-charcoal-dark/55">{userEmail}</p>
               )}
             </div>
           )}
@@ -110,7 +109,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <Button
           variant="ghost"
           className={cn(
-            "w-full border border-gold-muted/30 text-cream-50 hover:bg-cream-50/10",
+            "w-full border border-charcoal-dark/30 text-charcoal-dark hover:bg-charcoal-dark/10",
             collapsed && "px-0",
           )}
           onClick={() => {

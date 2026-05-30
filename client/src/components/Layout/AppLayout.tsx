@@ -13,7 +13,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-page-texture">
-      <div className="hidden lg:block">
+      <div className="hidden lg:flex lg:shrink-0">
         <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
       </div>
 
