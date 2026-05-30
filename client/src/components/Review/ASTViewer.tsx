@@ -8,6 +8,7 @@ import type { ReviewResult } from "@/lib/api";
 type ASTViewerProps = {
   ast: ReviewResult["ast"] | null;
   isLoading: boolean;
+  error?: string | null;
 };
 
 type GraphNode = {
@@ -36,7 +37,7 @@ const shapeByType: Record<string, string> = {
   import: "polygon",
 };
 
-export function ASTViewer({ ast, isLoading }: ASTViewerProps) {
+export function ASTViewer({ ast, isLoading, error }: ASTViewerProps) {
   const [nodes, setNodes] = useState<GraphNode[]>([]);
   const [activeNode, setActiveNode] = useState<GraphNode | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -64,6 +65,16 @@ export function ASTViewer({ ast, isLoading }: ASTViewerProps) {
     return (
       <div className="flex items-center justify-center py-20">
         <LoaderCircle size={32} className="animate-spin text-gold" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-12 text-center">
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-cognac-dark">Review Failed</p>
+        <p className="mt-3 font-elegant text-lg italic text-charcoal-light">{error}</p>
+        <p className="mt-6 font-body text-sm text-charcoal-light/70">Try again in a moment.</p>
       </div>
     );
   }

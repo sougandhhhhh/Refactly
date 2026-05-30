@@ -21,6 +21,7 @@ export function EditorPage() {
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const editorRef = useRef<MonacoEditorHandle>(null);
 
   const handleReview = async () => {
@@ -30,6 +31,8 @@ export function EditorPage() {
       return;
     }
     setIsReviewing(true);
+    setReviewError(null);
+    setReviewResult(null);
     setActiveTab("AI Review");
     try {
       const result = await triggerReview(code, language);
@@ -37,6 +40,7 @@ export function EditorPage() {
       showOldMoneyToast(`Review complete — score: ${result.review.score}/100`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Review failed";
+      setReviewError(msg);
       showOldMoneyToast(msg);
     } finally {
       setIsReviewing(false);
@@ -84,24 +88,28 @@ export function EditorPage() {
                 <AIFeedbackPanel
                   review={reviewResult?.review ?? null}
                   isLoading={isReviewing && activeTab === "AI Review"}
+                  error={reviewError}
                 />
               </TabsContent>
               <TabsContent value="Security">
                 <SecurityPanel
                   issues={reviewResult?.review.securityIssues ?? null}
                   isLoading={isReviewing && activeTab === "Security"}
+                  error={reviewError}
                 />
               </TabsContent>
               <TabsContent value="Complexity">
                 <ComplexityPanel
                   complexity={reviewResult?.review.complexity ?? null}
                   isLoading={isReviewing && activeTab === "Complexity"}
+                  error={reviewError}
                 />
               </TabsContent>
               <TabsContent value="AST">
                 <ASTViewer
                   ast={reviewResult?.ast ?? null}
                   isLoading={isReviewing && activeTab === "AST"}
+                  error={reviewError}
                 />
               </TabsContent>
             </div>
