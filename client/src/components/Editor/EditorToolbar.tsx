@@ -1,8 +1,7 @@
-import { Eye, EyeOff, PencilLine } from "lucide-react";
+import { PencilLine } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const languages = [
   { value: "typescript", label: "TypeScript" },
@@ -14,13 +13,11 @@ const languages = [
 type EditorToolbarProps = {
   language: string;
   onLanguageChange: (lang: string) => void;
-  minimapEnabled: boolean;
-  onMinimapToggle: () => void;
   onReviewClick?: () => void;
   isReviewing?: boolean;
 };
 
-export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMinimapToggle, onReviewClick, isReviewing }: EditorToolbarProps) {
+export function EditorToolbar({ language, onLanguageChange, onReviewClick, isReviewing }: EditorToolbarProps) {
   const [title, setTitle] = useState("Untitled Session");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
@@ -57,20 +54,6 @@ export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMi
             ))}
           </SelectContent>
         </Select>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={onMinimapToggle}
-                className="flex h-8 w-8 items-center justify-center rounded-sm text-stone-500 hover:bg-stone-100"
-                aria-label={minimapEnabled ? "Hide minimap" : "Show minimap"}
-              >
-                {minimapEnabled ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>{minimapEnabled ? "Hide minimap" : "Show minimap"}</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
         <Button className="w-full py-2 sm:w-auto" onClick={onReviewClick} disabled={isReviewing}>
           {isReviewing ? "Reviewing..." : "Review Code"}
         </Button>

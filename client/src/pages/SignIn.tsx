@@ -16,7 +16,7 @@ export function SignIn() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signInWithGoogle } = useAuth();
-  const redirect = new URLSearchParams(location.search).get("redirect") || "/dashboard";
+  const redirect = new URLSearchParams(location.search).get("redirect") || "/editor/session-2048";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

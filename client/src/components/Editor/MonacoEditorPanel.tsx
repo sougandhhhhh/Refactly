@@ -1,4 +1,5 @@
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
@@ -11,7 +12,6 @@ export type MonacoEditorHandle = {
 type MonacoEditorPanelProps = {
   compact?: boolean;
   language?: string;
-  minimapEnabled?: boolean;
 };
 
 const DEFAULT_CODE = `// Write or paste your code here, then click "Review Code"
@@ -21,8 +21,9 @@ function greet(name: string): string {
 `;
 
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(
-  ({ compact = false, language = "typescript", minimapEnabled = !compact }, ref) => {
+  ({ compact = false, language = "typescript" }, ref) => {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+    const [minimapEnabled, setMinimapEnabled] = useState(true);
 
     useImperativeHandle(ref, () => ({
       getCode: () => editorRef.current?.getValue() || "",
@@ -38,8 +39,17 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
 
     return (
       <div className="card-old-money relative overflow-hidden">
-        <div className="border-b border-stone-200 bg-cream-100/80 px-5 py-3 font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
-          live-review.{language}
+        <div className="flex items-center justify-between border-b border-stone-200 bg-cream-100/80 px-5 py-3">
+          <span className="font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
+            live-review.{language}
+          </span>
+          <button
+            onClick={() => setMinimapEnabled((v) => !v)}
+            className="flex h-6 w-6 items-center justify-center rounded-sm text-stone-500 hover:bg-stone-200/60"
+            aria-label={minimapEnabled ? "Hide minimap" : "Show minimap"}
+          >
+            {minimapEnabled ? <Eye size={14} /> : <EyeOff size={14} />}
+          </button>
         </div>
         <div className={compact ? "h-[500px]" : "h-[calc(100vh-120px)]"}>
           <Editor

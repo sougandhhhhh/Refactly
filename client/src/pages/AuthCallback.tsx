@@ -16,7 +16,7 @@ export function AuthCallback() {
           image: session.user.user_metadata?.avatar_url,
         };
         localStorage.setItem("refactly.user", JSON.stringify(user));
-        navigate("/dashboard", { replace: true });
+        navigate("/editor/session-2048", { replace: true });
       } else {
         navigate("/signin", { replace: true });
       }

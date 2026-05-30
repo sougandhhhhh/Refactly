@@ -7,9 +7,9 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 const items = [
+  { label: "Reviews", icon: Sparkles, href: "/editor/session-2048" },
   { label: "Overview", icon: LayoutGrid, href: "/dashboard" },
   { label: "Sessions", icon: ClipboardCheck, href: "/dashboard#sessions" },
-  { label: "Reviews", icon: Sparkles, href: "/editor/session-2048" },
   { label: "Analytics", icon: BarChart3, href: "/dashboard#analytics" },
   { label: "Settings", icon: Settings, href: "/dashboard#settings" },
 ];

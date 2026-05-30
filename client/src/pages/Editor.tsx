@@ -18,7 +18,6 @@ const MonacoEditorPanel = lazy(async () => {
 
 export function EditorPage() {
   const [language, setLanguage] = useState("typescript");
-  const [minimapEnabled, setMinimapEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
@@ -49,8 +48,6 @@ export function EditorPage() {
       <EditorToolbar
         language={language}
         onLanguageChange={setLanguage}
-        minimapEnabled={minimapEnabled}
-        onMinimapToggle={() => setMinimapEnabled((v) => !v)}
         onReviewClick={handleReview}
         isReviewing={isReviewing}
       />
@@ -68,7 +65,7 @@ export function EditorPage() {
               </div>
             }
           >
-            <MonacoEditorPanel ref={editorRef} language={language} minimapEnabled={minimapEnabled} />
+            <MonacoEditorPanel ref={editorRef} language={language} />
           </Suspense>
         </div>
         <aside className="overflow-y-auto border-t border-stone-200 bg-cream-100/80 xl:border-t-0">
