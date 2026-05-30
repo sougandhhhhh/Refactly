@@ -38,8 +38,9 @@ export async function triggerReview(req: AuthRequest, res: Response) {
 
     res.json({ review, ast });
   } catch (error) {
-    console.error("Trigger review error:", error);
-    res.status(500).json({ error: "Failed to run review" });
+    const msg = error instanceof Error ? error.message : "Failed to run review";
+    console.error("Trigger review error:", msg);
+    res.status(500).json({ error: msg });
   }
 }
 

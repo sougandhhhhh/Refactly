@@ -18,6 +18,9 @@ export interface AIReviewResult {
 const REVIEW_MODEL = "gemini-2.0-flash";
 
 export async function runAIReview(code: string, language: string): Promise<AIReviewResult> {
+  if (!config.google.apiKey) {
+    throw new Error("GOOGLE_AI_API_KEY is not set on the server");
+  }
   const prompt = `You are a senior software engineer performing a code review. Analyze the following ${language} code and respond ONLY with valid JSON in this exact format:
 {
   "suggestions": [
