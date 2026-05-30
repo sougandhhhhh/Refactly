@@ -65,6 +65,15 @@
     border-radius: 3px;
   }
 
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background: #4A4440;
+    border-radius: 3px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: #1A1614;
+  }
+
   input, textarea, select {
     caret-color: #a67c2e;
   }

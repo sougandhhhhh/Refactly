@@ -42,7 +42,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col justify-between bg-charcoal px-3 py-5 text-cream-50 transition-all duration-300",
+        "flex flex-col justify-between bg-charcoal px-3 py-5 text-cream-50 transition-all duration-300 sidebar-scroll",
         collapsed ? "w-[64px]" : "w-[240px]",
       )}
     >
@@ -50,7 +50,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
           {!collapsed && (
             <Link to="/dashboard" aria-label="Refactly dashboard">
-              <BrandLogo theme="dark" size="sm" showDescriptor={false} />
+              <BrandLogo size="sm" showDescriptor={false} wordClassName="text-cream-50" />
             </Link>
           )}
           <button
