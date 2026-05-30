@@ -74,12 +74,7 @@ const SidebarProvider = React.forwardRef<
         <div
           ref={ref}
           data-slot="sidebar-provider"
-          data-state={state}
-          style={{
-            "--sidebar-width": state === "expanded" ? SIDEBAR_WIDTH : SIDEBAR_WIDTH_ICON,
-            "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
-          } as React.CSSProperties}
-          className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)}
+          className={cn("flex min-h-svh w-full", className)}
           {...props}
         >
           {children}
@@ -99,14 +94,16 @@ const Sidebar = React.forwardRef<
   }
 >(({ side = "left", variant = "sidebar", collapsible = "icon", className, children, ...props }, ref) => {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const width = state === "expanded" ? SIDEBAR_WIDTH : SIDEBAR_WIDTH_ICON;
 
   if (collapsible === "none") {
     return (
       <div
         ref={ref}
         data-slot="sidebar"
+        style={{ width: SIDEBAR_WIDTH }}
         className={cn(
-          "flex h-svh w-(--sidebar-width) flex-col bg-gold text-charcoal-dark",
+          "flex h-svh flex-col bg-gold text-charcoal-dark",
           className,
         )}
         {...props}
@@ -134,15 +131,11 @@ const Sidebar = React.forwardRef<
       data-slot="sidebar"
       data-side={side}
       data-variant={variant}
-      data-collapsible={state === "collapsed" ? collapsible : ""}
+      data-state={state}
+      style={{ width }}
       className={cn(
-        "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-300 ease-linear md:flex",
-        side === "left"
-          ? "left-0 group-data-[collapsible=offcanvas]/sidebar-wrapper:left-[calc(var(--sidebar-width)*-1)]"
-          : "right-0 group-data-[collapsible=offcanvas]/sidebar-wrapper:right-[calc(var(--sidebar-width)*-1)]",
-        variant === "floating" || variant === "inset"
-          ? "p-2 group-data-[collapsible=icon]/sidebar-wrapper:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-          : "group-data-[collapsible=icon]/sidebar-wrapper:w-(--sidebar-width-icon)",
+        "fixed inset-y-0 left-0 z-10 hidden h-svh transition-[width] duration-300 ease-linear md:flex",
+        variant === "floating" || variant === "inset" ? "p-2" : "",
         className,
       )}
       {...props}
@@ -366,19 +359,22 @@ const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<"bu
 SidebarRail.displayName = "SidebarRail";
 
 const SidebarInset = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
-  ({ className, ...props }, ref) => (
-    <main
-      ref={ref}
-      data-slot="sidebar-inset"
-      className={cn(
-        "relative flex min-h-svh flex-1 flex-col bg-page-texture",
-        "md:pl-[var(--sidebar-width)] transition-[padding-left] duration-300 ease-linear",
-        "peer-data-[variant=inset]/sidebar:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]/sidebar:m-2 md:peer-data-[variant=inset]/sidebar:ml-2 md:peer-data-[variant=inset]/sidebar:rounded-xl md:peer-data-[variant=inset]/sidebar:border md:peer-data-[variant=inset]/sidebar:border-stone-200",
-        className,
-      )}
-      {...props}
-    />
-  ),
+  ({ className, ...props }, ref) => {
+    const { state } = useSidebar();
+    const paddingLeft = state === "expanded" ? SIDEBAR_WIDTH : SIDEBAR_WIDTH_ICON;
+    return (
+      <main
+        ref={ref}
+        data-slot="sidebar-inset"
+        style={{ paddingLeft }}
+        className={cn(
+          "relative flex min-h-svh flex-1 flex-col bg-page-texture transition-[padding-left] duration-300 ease-linear",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
 );
 SidebarInset.displayName = "SidebarInset";
 
