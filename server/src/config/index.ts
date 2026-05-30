@@ -12,6 +12,9 @@ export const config = {
   groq: {
     apiKey: process.env.GROQ_API_KEY || "",
   },
+  google: {
+    apiKey: process.env.GOOGLE_AI_API_KEY || "",
+  },
   upstash: {
     redisUrl: process.env.UPSTASH_REDIS_URL || "",
     redisToken: process.env.UPSTASH_REDIS_TOKEN || "",

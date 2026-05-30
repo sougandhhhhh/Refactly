@@ -25,9 +25,10 @@ type EditorToolbarProps = {
   minimapEnabled: boolean;
   onMinimapToggle: () => void;
   onReviewClick?: () => void;
+  isReviewing?: boolean;
 };
 
-export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMinimapToggle, onReviewClick }: EditorToolbarProps) {
+export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMinimapToggle, onReviewClick, isReviewing }: EditorToolbarProps) {
   const [title, setTitle] = useState("Payments Reconciliation Service");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
@@ -94,8 +95,8 @@ export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMi
             <PresenceAvatar key={person.name} stacked {...person} />
           ))}
         </div>
-        <Button className="w-full py-2 sm:w-auto" onClick={onReviewClick}>
-          Review Code
+        <Button className="w-full py-2 sm:w-auto" onClick={onReviewClick} disabled={isReviewing}>
+          {isReviewing ? "Reviewing..." : "Review Code"}
         </Button>
       </div>
     </div>

@@ -1,18 +1,45 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth.middleware";
+import { runAIReview } from "../services/ai.service";
+import { scanForVulnerabilities } from "../services/security.service";
+import { analyzeComplexity } from "../services/complexity.service";
+import { analyzeAST } from "../services/ast.service";
 
 export async function triggerReview(req: AuthRequest, res: Response) {
   try {
-    const { sessionId, code, language } = req.body;
+    const { code, language } = req.body;
 
-    // Import dynamically to avoid circular dependencies
-    const { addReviewJob } = await import("../services/queue.service");
-    const job = await addReviewJob({ sessionId, code, language });
+    if (!code) {
+      return res.status(400).json({ error: "Code is required" });
+    }
 
-    res.json({ jobId: job.id, message: "Review queued" });
+    const [aiReview, securityIssues, complexity, ast] = await Promise.all([
+      runAIReview(code, language || "typescript"),
+      Promise.resolve(scanForVulnerabilities(code)),
+      Promise.resolve(analyzeComplexity(code, language || "typescript")),
+      Promise.resolve(analyzeAST(code, language || "typescript")),
+    ]);
+
+    const allSecurityIssues = [...securityIssues, ...aiReview.security];
+
+    const review = {
+      suggestions: aiReview.suggestions,
+      securityIssues: allSecurityIssues,
+      complexity: {
+        time: aiReview.complexity.time || complexity.time,
+        space: aiReview.complexity.space || complexity.space,
+        explanation: aiReview.complexity.explanation || complexity.explanation,
+        perFunction: complexity.perFunction,
+      },
+      codeSmells: aiReview.codeSmells,
+      score: aiReview.score,
+      summary: aiReview.summary,
+    };
+
+    res.json({ review, ast });
   } catch (error) {
     console.error("Trigger review error:", error);
-    res.status(500).json({ error: "Failed to queue review" });
+    res.status(500).json({ error: "Failed to run review" });
   }
 }
 

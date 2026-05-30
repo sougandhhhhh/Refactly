@@ -1,11 +1,14 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { EditorToolbar } from "@/components/Editor/EditorToolbar";
+import type { MonacoEditorHandle } from "@/components/Editor/MonacoEditorPanel";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { AIFeedbackPanel } from "@/components/Review/AIFeedbackPanel";
 import { ASTViewer } from "@/components/Review/ASTViewer";
 import { ComplexityPanel } from "@/components/Review/ComplexityPanel";
 import { SecurityPanel } from "@/components/Review/SecurityPanel";
+import { showOldMoneyToast } from "@/components/common/Toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { triggerReview, type ReviewResult } from "@/lib/api";
 
 const tabs = ["AI Review", "Security", "Complexity", "AST"] as const;
 const MonacoEditorPanel = lazy(async () => {
@@ -17,6 +20,29 @@ export function EditorPage() {
   const [language, setLanguage] = useState("typescript");
   const [minimapEnabled, setMinimapEnabled] = useState(true);
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
+  const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
+  const [isReviewing, setIsReviewing] = useState(false);
+  const editorRef = useRef<MonacoEditorHandle>(null);
+
+  const handleReview = async () => {
+    const code = editorRef.current?.getCode();
+    if (!code) {
+      showOldMoneyToast("No code to review.");
+      return;
+    }
+    setIsReviewing(true);
+    setActiveTab("AI Review");
+    try {
+      const result = await triggerReview(code, language);
+      setReviewResult(result);
+      showOldMoneyToast(`Review complete — score: ${result.review.score}/100`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Review failed";
+      showOldMoneyToast(msg);
+    } finally {
+      setIsReviewing(false);
+    }
+  };
 
   return (
     <AppLayout>
@@ -25,7 +51,8 @@ export function EditorPage() {
         onLanguageChange={setLanguage}
         minimapEnabled={minimapEnabled}
         onMinimapToggle={() => setMinimapEnabled((v) => !v)}
-        onReviewClick={() => setActiveTab("AI Review")}
+        onReviewClick={handleReview}
+        isReviewing={isReviewing}
       />
       <div className="grid min-h-[calc(100vh-64px)] xl:grid-cols-[1.55fr_1fr]">
         <div className="border-r border-stone-200 p-3 sm:p-4">
@@ -41,7 +68,7 @@ export function EditorPage() {
               </div>
             }
           >
-            <MonacoEditorPanel language={language} minimapEnabled={minimapEnabled} />
+            <MonacoEditorPanel ref={editorRef} language={language} minimapEnabled={minimapEnabled} />
           </Suspense>
         </div>
         <aside className="overflow-y-auto border-t border-stone-200 bg-cream-100/80 xl:border-t-0">
@@ -57,16 +84,28 @@ export function EditorPage() {
             </div>
             <div className="p-6">
               <TabsContent value="AI Review">
-                <AIFeedbackPanel />
+                <AIFeedbackPanel
+                  review={reviewResult?.review ?? null}
+                  isLoading={isReviewing && activeTab === "AI Review"}
+                />
               </TabsContent>
               <TabsContent value="Security">
-                <SecurityPanel />
+                <SecurityPanel
+                  issues={reviewResult?.review.securityIssues ?? null}
+                  isLoading={isReviewing && activeTab === "Security"}
+                />
               </TabsContent>
               <TabsContent value="Complexity">
-                <ComplexityPanel />
+                <ComplexityPanel
+                  complexity={reviewResult?.review.complexity ?? null}
+                  isLoading={isReviewing && activeTab === "Complexity"}
+                />
               </TabsContent>
               <TabsContent value="AST">
-                <ASTViewer />
+                <ASTViewer
+                  ast={reviewResult?.ast ?? null}
+                  isLoading={isReviewing && activeTab === "AST"}
+                />
               </TabsContent>
             </div>
           </Tabs>

@@ -2,8 +2,8 @@ import OpenAI from "openai";
 import { config } from "../config";
 
 const openai = new OpenAI({
-  apiKey: config.groq.apiKey,
-  baseURL: "https://api.groq.com/openai/v1",
+  apiKey: config.google.apiKey,
+  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
 export interface AIReviewResult {
@@ -14,6 +14,8 @@ export interface AIReviewResult {
   score: number;
   summary: string;
 }
+
+const REVIEW_MODEL = "gemini-2.0-flash";
 
 export async function runAIReview(code: string, language: string): Promise<AIReviewResult> {
   const prompt = `You are a senior software engineer performing a code review. Analyze the following ${language} code and respond ONLY with valid JSON in this exact format:
@@ -40,10 +42,10 @@ ${code}
 \`\`\``;
 
   const result = await openai.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: REVIEW_MODEL,
     messages: [{ role: "user", content: prompt }],
     temperature: 0.3,
-    max_tokens: 2000,
+    max_tokens: 4096,
   });
 
   const text = result.choices[0].message.content;

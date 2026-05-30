@@ -1,13 +1,21 @@
 import { forceCenter, forceLink, forceManyBody, forceSimulation } from "d3";
 import { useEffect, useRef, useState } from "react";
+import { LoaderCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { astLinks, astNodes } from "@/lib/data";
+import type { ReviewResult } from "@/lib/api";
+
+type ASTViewerProps = {
+  ast: ReviewResult["ast"] | null;
+  isLoading: boolean;
+};
 
 type GraphNode = {
   id: string;
+  name: string;
   type: string;
   line: number;
+  complexity?: number;
   x?: number;
   y?: number;
   vx?: number;
@@ -22,20 +30,24 @@ const fillByType: Record<string, string> = {
   import: "#1C2E4A",
 };
 
-export function ASTViewer() {
-  const [nodes, setNodes] = useState<GraphNode[]>(astNodes.map((node) => ({ ...node })));
+const shapeByType: Record<string, string> = {
+  function: "circle",
+  variable: "rect",
+  import: "polygon",
+};
+
+export function ASTViewer({ ast, isLoading }: ASTViewerProps) {
+  const [nodes, setNodes] = useState<GraphNode[]>([]);
   const [activeNode, setActiveNode] = useState<GraphNode | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!hostRef.current) {
-      return;
-    }
+    if (!ast || !hostRef.current) return;
 
     const width = hostRef.current.clientWidth || 340;
     const height = 260;
-    const graphNodes = astNodes.map((node) => ({ ...node })) as GraphNode[];
-    const graphLinks = astLinks.map((link) => ({ ...link }));
+    const graphNodes = ast.nodes.map((n) => ({ ...n, type: n.type })) as GraphNode[];
+    const graphLinks = ast.edges.map((e) => ({ source: e.source, target: e.target }));
 
     const simulation = forceSimulation(graphNodes)
       .force("charge", forceManyBody().strength(-120))
@@ -45,27 +57,42 @@ export function ASTViewer() {
         setNodes([...graphNodes]);
       });
 
-    return () => {
-      simulation.stop();
-    };
-  }, []);
+    return () => { simulation.stop(); };
+  }, [ast]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <LoaderCircle size={32} className="animate-spin text-gold" />
+      </div>
+    );
+  }
+
+  if (!ast) {
+    return (
+      <div className="py-12 text-center">
+        <p className="font-elegant text-2xl italic text-charcoal-light">
+          Run a review to see the AST graph.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Card className="p-6">
       <p className="eyebrow">AST Graph</p>
+      <p className="mt-2 font-body text-base text-charcoal-light">
+        {ast.cyclomaticComplexity} cyclomatic complexity &middot; {ast.functionCount} functions &middot; {ast.importCount} imports
+      </p>
       <div ref={hostRef} className="mt-6">
         <svg viewBox="0 0 360 260" className="w-full">
-          {astLinks.map((link) => {
-            const source = nodes.find((node) => node.id === link.source);
-            const target = nodes.find((node) => node.id === link.target);
-
-            if (!source || !target) {
-              return null;
-            }
-
+          {ast.edges.map((link, i) => {
+            const source = nodes.find((n) => n.id === link.source);
+            const target = nodes.find((n) => n.id === link.target);
+            if (!source || !target) return null;
             return (
               <line
-                key={`${link.source}-${link.target}`}
+                key={`${link.source}-${link.target}-${i}`}
                 x1={source.x ?? 0}
                 y1={source.y ?? 0}
                 x2={target.x ?? 0}
@@ -75,7 +102,6 @@ export function ASTViewer() {
               />
             );
           })}
-
           {nodes.map((node) => (
             <g
               key={node.id}
@@ -83,13 +109,13 @@ export function ASTViewer() {
               onClick={() => setActiveNode(node)}
               transform={`translate(${node.x ?? 0}, ${node.y ?? 0})`}
             >
-              {node.type === "function" ? <circle r="18" fill={fillByType[node.type]} /> : null}
-              {node.type === "variable" ? <rect x="-16" y="-16" width="32" height="32" fill={fillByType[node.type]} /> : null}
-              {node.type === "import" ? (
+              {shapeByType[node.type] === "circle" ? <circle r="18" fill={fillByType[node.type]} /> : null}
+              {shapeByType[node.type] === "rect" ? <rect x="-16" y="-16" width="32" height="32" fill={fillByType[node.type]} /> : null}
+              {shapeByType[node.type] === "polygon" ? (
                 <polygon points="0,-18 18,0 0,18 -18,0" fill={fillByType[node.type]} />
               ) : null}
               <text y="34" textAnchor="middle" fontFamily="JetBrains Mono" fontSize="9" fill="#6B6460">
-                {node.id.replace(/^(fn|var|import)-/, "")}
+                {node.name.replace(/^.*\s/, "")}
               </text>
             </g>
           ))}
