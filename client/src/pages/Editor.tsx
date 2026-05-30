@@ -16,7 +16,7 @@ const MonacoEditorPanel = lazy(async () => {
 export function EditorPage() {
   const [language, setLanguage] = useState("typescript");
   const [minimapEnabled, setMinimapEnabled] = useState(true);
-  const [activeTab, setActiveTab] = useState(tabs[0]);
+  const [activeTab, setActiveTab] = useState<string>(tabs[0]);
 
   return (
     <AppLayout>
