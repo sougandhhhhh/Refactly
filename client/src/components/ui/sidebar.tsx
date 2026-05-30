@@ -74,7 +74,11 @@ const SidebarProvider = React.forwardRef<
         <div
           ref={ref}
           data-slot="sidebar-provider"
-          style={{ "--sidebar-width": SIDEBAR_WIDTH, "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
+          data-state={state}
+          style={{
+            "--sidebar-width": state === "expanded" ? SIDEBAR_WIDTH : SIDEBAR_WIDTH_ICON,
+            "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
+          } as React.CSSProperties}
           className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)}
           {...props}
         >
@@ -368,6 +372,7 @@ const SidebarInset = React.forwardRef<HTMLDivElement, React.ComponentProps<"div"
       data-slot="sidebar-inset"
       className={cn(
         "relative flex min-h-svh flex-1 flex-col bg-page-texture",
+        "md:pl-[var(--sidebar-width)] transition-[padding-left] duration-300 ease-linear",
         "peer-data-[variant=inset]/sidebar:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]/sidebar:m-2 md:peer-data-[variant=inset]/sidebar:ml-2 md:peer-data-[variant=inset]/sidebar:rounded-xl md:peer-data-[variant=inset]/sidebar:border md:peer-data-[variant=inset]/sidebar:border-stone-200",
         className,
       )}

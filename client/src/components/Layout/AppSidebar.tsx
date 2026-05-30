@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardCheck, LayoutGrid, LogOut, Settings, Sparkles } from "lucide-react";
+import { BarChart3, ClipboardCheck, LayoutGrid, LogOut, PanelLeftClose, PanelLeft, Settings, Sparkles } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { showOldMoneyToast } from "@/components/common/Toast";
@@ -15,6 +15,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const items = [
@@ -29,6 +31,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { toggleSidebar, state } = useSidebar();
 
   const userName = user?.name || "Private Workspace";
   const userEmail = user?.email || "";
@@ -52,9 +55,17 @@ export function AppSidebar() {
           <Link to="/dashboard" aria-label="Refactly dashboard">
             <BrandLogo size="sm" showDescriptor={false} />
           </Link>
+          <button
+            onClick={toggleSidebar}
+            className="flex h-8 w-8 items-center justify-center rounded-sm text-charcoal-dark/60 hover:bg-charcoal-dark/10 hover:text-charcoal-dark"
+            aria-label={state === "expanded" ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {state === "expanded" ? <PanelLeftClose size={16} /> : <PanelLeft size={16} />}
+          </button>
         </div>
         <div className="h-px w-full bg-charcoal-dark/15" />
       </SidebarHeader>
+      <SidebarRail />
 
       <SidebarContent>
         <SidebarGroup>
