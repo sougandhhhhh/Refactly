@@ -49,7 +49,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
           {!collapsed && (
             <Link to="/dashboard" aria-label="Refactly dashboard">
-              <BrandLogo size="sm" showDescriptor={false} theme="dark" />
+              <BrandLogo size="sm" showDescriptor={false} />
             </Link>
           )}
           <button
