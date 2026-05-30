@@ -1,4 +1,4 @@
-import { BarChart3, ChevronLeft, ChevronRight, ClipboardCheck, LayoutGrid, LogOut, Settings, Sparkles } from "lucide-react";
+import { BarChart3, ClipboardCheck, LayoutGrid, LogOut, PanelLeft, PanelLeftClose, Settings, Sparkles } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { showOldMoneyToast } from "@/components/common/Toast";
@@ -42,7 +42,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "flex flex-col justify-between bg-gold px-3 py-5 text-charcoal-dark transition-all duration-300 sidebar-scroll",
+        "fixed left-0 top-0 z-10 flex h-svh flex-col justify-between bg-gold px-3 py-5 text-charcoal-dark transition-[width] duration-300 ease-linear sidebar-scroll",
         collapsed ? "w-[64px]" : "w-[240px]",
       )}
     >
@@ -58,7 +58,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             className="flex h-8 w-8 items-center justify-center rounded-sm text-charcoal-dark/60 hover:bg-charcoal-dark/10 hover:text-charcoal-dark"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
           </button>
         </div>
         <div className={cn("mt-4 h-px w-full bg-charcoal-dark/15", collapsed && "w-8 mx-auto")} />
