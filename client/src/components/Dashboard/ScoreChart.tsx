@@ -1,7 +1,25 @@
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { chartData } from "@/lib/data";
 
-export function ScoreChart() {
+type ScoreChartProps = {
+  scoreHistory: Array<{ score: number; createdAt: string }>;
+};
+
+export function ScoreChart({ scoreHistory }: ScoreChartProps) {
+  const chartData = scoreHistory.map((h) => ({
+    label: new Date(h.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
+    score: h.score,
+  }));
+
+  if (chartData.length === 0) {
+    return (
+      <div className="card-old-money p-8 text-center">
+        <p className="font-elegant text-2xl italic text-charcoal-light">
+          No reviews yet. Run a review to see your score history.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="card-old-money h-full p-6">
       <h2 className="text-3xl text-charcoal-dark">Score Over Time</h2>

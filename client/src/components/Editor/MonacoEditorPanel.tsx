@@ -2,8 +2,6 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import { CollabCursors } from "@/components/Editor/CollabCursors";
-import { editorSample } from "@/lib/data";
 import { oldMoneyTheme } from "@/lib/monacoTheme";
 
 export type MonacoEditorHandle = {
@@ -15,6 +13,12 @@ type MonacoEditorPanelProps = {
   language?: string;
   minimapEnabled?: boolean;
 };
+
+const DEFAULT_CODE = `// Write or paste your code here, then click "Review Code"
+function greet(name: string): string {
+  return \`Hello, \${name}!\`;
+}
+`;
 
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(
   ({ compact = false, language = "typescript", minimapEnabled = !compact }, ref) => {
@@ -28,30 +32,6 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
       editorRef.current = editor;
       monaco.editor.defineTheme("old-money-theme", oldMoneyTheme);
       monaco.editor.setTheme("old-money-theme");
-
-      const model = editor.getModel();
-      if (!model) return;
-
-      const markers = [
-        {
-          startLineNumber: 18,
-          endLineNumber: 18,
-          startColumn: 9,
-          endColumn: 24,
-          severity: monaco.MarkerSeverity.Warning,
-          message: "Potential null access when provider metadata is absent.",
-        },
-        {
-          startLineNumber: 20,
-          endLineNumber: 20,
-          startColumn: 9,
-          endColumn: 46,
-          severity: monaco.MarkerSeverity.Error,
-          message: "Cache key should be tenant scoped.",
-        },
-      ];
-
-      monaco.editor.setModelMarkers(model, "owner", markers);
     };
 
     const langLabel = language.charAt(0).toUpperCase() + language.slice(1);
@@ -65,7 +45,7 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
           <Editor
             key={language}
             language={language}
-            defaultValue={editorSample}
+            defaultValue={DEFAULT_CODE}
             onMount={handleMount}
             options={{
               fontFamily: "JetBrains Mono",
@@ -80,11 +60,8 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
             }}
           />
         </div>
-        {!compact ? <CollabCursors /> : null}
         <div className="flex items-center justify-between border-t border-stone-200 bg-cream-100/80 px-5 py-2 font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
           <span>{langLabel}</span>
-          <span>Ln 18, Col 12</span>
-          <span>2.4 KB</span>
         </div>
       </div>
     );

@@ -1,9 +1,24 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ScoreBadge } from "@/components/common/ScoreBadge";
-import { sessions, staggerContainer, staggerItem } from "@/lib/data";
+import { staggerContainer, staggerItem } from "@/lib/data";
+import type { SessionData } from "@/lib/api";
 
-export function SessionTable() {
+type SessionTableProps = {
+  sessions: SessionData[];
+};
+
+export function SessionTable({ sessions }: SessionTableProps) {
+  if (sessions.length === 0) {
+    return (
+      <div className="card-old-money p-8 text-center">
+        <p className="font-elegant text-2xl italic text-charcoal-light">
+          No sessions yet. Create a session from the editor to get started.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="card-old-money overflow-hidden">
       <div className="border-b border-stone-200 px-6 py-5">
@@ -23,10 +38,12 @@ export function SessionTable() {
             variants={staggerItem}
             className="grid grid-cols-[2fr_0.9fr_0.8fr_0.9fr_0.7fr] items-center border-b border-stone-200 px-6 py-4 text-lg transition-colors duration-300 hover:bg-cream-100"
           >
-            <span className="text-2xl text-charcoal-dark">{session.name}</span>
+            <span className="text-2xl text-charcoal-dark">{session.title}</span>
             <span>{session.language}</span>
-            <ScoreBadge score={session.score} />
-            <span className="font-mono text-sm uppercase tracking-[0.14em] text-stone-500">{session.date}</span>
+            <ScoreBadge score={session.score ?? 0} />
+            <span className="font-mono text-sm uppercase tracking-[0.14em] text-stone-500">
+              {new Date(session.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            </span>
             <Link to={`/editor/${session.id}`} className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
               Open
             </Link>

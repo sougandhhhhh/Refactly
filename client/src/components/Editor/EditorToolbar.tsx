@@ -1,16 +1,8 @@
 import { Eye, EyeOff, PencilLine } from "lucide-react";
 import { useState } from "react";
-import { PresenceAvatar } from "@/components/common/PresenceAvatar";
-import { showOldMoneyToast } from "@/components/common/Toast";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-const collaborators = [
-  { name: "Eleanor Voss", color: "#2C5038" },
-  { name: "Miles Stone", color: "#A67C2E" },
-  { name: "A. Grant", color: "#1C2E4A" },
-];
 
 const languages = [
   { value: "typescript", label: "TypeScript" },
@@ -29,7 +21,7 @@ type EditorToolbarProps = {
 };
 
 export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMinimapToggle, onReviewClick, isReviewing }: EditorToolbarProps) {
-  const [title, setTitle] = useState("Payments Reconciliation Service");
+  const [title, setTitle] = useState("Untitled Session");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   return (
@@ -41,16 +33,8 @@ export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMi
             autoFocus
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            onBlur={() => {
-              setIsEditingTitle(false);
-              showOldMoneyToast("Session title updated.");
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                setIsEditingTitle(false);
-                showOldMoneyToast("Session title updated.");
-              }
-            }}
+            onBlur={() => setIsEditingTitle(false)}
+            onKeyDown={(event) => { if (event.key === "Enter") setIsEditingTitle(false); }}
             className="w-full min-w-0 border-b border-gold bg-transparent font-display text-xl text-charcoal-dark outline-none sm:text-2xl lg:min-w-[320px]"
           />
         ) : (
@@ -63,10 +47,7 @@ export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMi
         )}
       </div>
       <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <Select
-          value={language}
-          onValueChange={onLanguageChange}
-        >
+        <Select value={language} onValueChange={onLanguageChange}>
           <SelectTrigger className="w-full sm:w-auto">
             <SelectValue placeholder="Language" />
           </SelectTrigger>
@@ -90,11 +71,6 @@ export function EditorToolbar({ language, onLanguageChange, minimapEnabled, onMi
             <TooltipContent>{minimapEnabled ? "Hide minimap" : "Show minimap"}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <div className="flex">
-          {collaborators.map((person) => (
-            <PresenceAvatar key={person.name} stacked {...person} />
-          ))}
-        </div>
         <Button className="w-full py-2 sm:w-auto" onClick={onReviewClick} disabled={isReviewing}>
           {isReviewing ? "Reviewing..." : "Review Code"}
         </Button>

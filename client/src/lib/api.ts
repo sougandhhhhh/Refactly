@@ -71,6 +71,35 @@ export type ReviewResult = {
   };
 };
 
+export type DashboardStats = {
+  totalSessions: number;
+  totalReviews: number;
+  averageScore: number;
+  scoreHistory: Array<{ score: number; createdAt: string }>;
+};
+
+export type SessionData = {
+  id: string;
+  title: string;
+  language: string;
+  score?: number;
+  createdAt: string;
+};
+
+export async function fetchDashboardStats(): Promise<DashboardStats> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/user/stats`, { headers });
+  if (!res.ok) throw new Error("Failed to fetch stats");
+  return res.json();
+}
+
+export async function fetchSessions(): Promise<SessionData[]> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/sessions`, { headers });
+  if (!res.ok) throw new Error("Failed to fetch sessions");
+  return res.json();
+}
+
 export async function triggerReview(code: string, language: string): Promise<ReviewResult> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_URL}/review/analyze`, {
