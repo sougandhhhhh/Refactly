@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { EditorToolbar } from "@/components/Editor/EditorToolbar";
-import { PageWrapper } from "@/components/Layout/PageWrapper";
+import { AppLayout } from "@/components/Layout/AppLayout";
 import { AIFeedbackPanel } from "@/components/Review/AIFeedbackPanel";
 import { ASTViewer } from "@/components/Review/ASTViewer";
 import { ComplexityPanel } from "@/components/Review/ComplexityPanel";
@@ -15,9 +15,9 @@ const MonacoEditorPanel = lazy(async () => {
 
 export function EditorPage() {
   return (
-    <PageWrapper className="min-h-screen bg-page-texture">
+    <AppLayout>
       <EditorToolbar />
-      <div className="grid min-h-[calc(100vh-96px)] xl:grid-cols-[1.55fr_1fr]">
+      <div className="grid min-h-[calc(100vh-64px)] xl:grid-cols-[1.55fr_1fr]">
         <div className="border-r border-stone-200 p-3 sm:p-4">
           <Suspense
             fallback={
@@ -62,6 +62,6 @@ export function EditorPage() {
           </Tabs>
         </aside>
       </div>
-    </PageWrapper>
+    </AppLayout>
   );
 }
