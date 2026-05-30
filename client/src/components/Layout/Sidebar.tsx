@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 
 const items = [
   { label: "Overview", icon: LayoutGrid, href: "/dashboard" },
-  { label: "Sessions", icon: ClipboardCheck, href: "/dashboard" },
+  { label: "Sessions", icon: ClipboardCheck, href: "/dashboard#sessions" },
   { label: "Reviews", icon: Sparkles, href: "/editor/session-2048" },
-  { label: "Analytics", icon: BarChart3, href: "/dashboard" },
-  { label: "Settings", icon: Settings, href: "/dashboard" },
+  { label: "Analytics", icon: BarChart3, href: "/dashboard#analytics" },
+  { label: "Settings", icon: Settings, href: "/dashboard#settings" },
 ];
 
 type SidebarProps = {
@@ -34,8 +34,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     .slice(0, 2);
 
   const isActive = (href: string) => {
-    if (href === "/dashboard") return location.pathname === "/dashboard";
-    return location.pathname.startsWith(href);
+    const [path, hash] = href.split("#");
+    if (hash) return location.pathname === path && location.hash === `#${hash}`;
+    return location.pathname === path && !location.hash;
   };
 
   return (
