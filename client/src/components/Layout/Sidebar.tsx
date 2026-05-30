@@ -102,7 +102,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <div className="min-w-0">
               <p className="truncate font-body text-base text-charcoal-dark">{userName}</p>
               {userEmail && (
-                <p className="truncate font-mono text-2xs uppercase tracking-[0.18em] text-charcoal-dark/55">{userEmail}</p>
+                <p className="break-all font-mono text-[9px] uppercase tracking-[0.15em] leading-relaxed text-charcoal-dark/55">{userEmail}</p>
               )}
             </div>
           )}
