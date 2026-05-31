@@ -6,10 +6,16 @@ import type { editor } from "monaco-editor";
 import { oldMoneyTheme } from "@/lib/monacoTheme";
 
 const languages = [
-  { value: "typescript", label: "TypeScript" },
-  { value: "go", label: "Go" },
   { value: "python", label: "Python" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "java", label: "Java" },
+  { value: "cpp", label: "C++" },
+  { value: "c", label: "C" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "csharp", label: "C#" },
+  { value: "go", label: "Go (Golang)" },
   { value: "rust", label: "Rust" },
+  { value: "php", label: "PHP" },
 ];
 
 export type MonacoEditorHandle = {
