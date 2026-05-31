@@ -40,8 +40,11 @@ export function EditorPage() {
       showOldMoneyToast(`Review complete — score: ${result.review.score}/100`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Review failed";
-      setReviewError(msg);
-      showOldMoneyToast(msg);
+      const friendly = msg === "Failed to fetch"
+        ? "Server is not responding — Render free tier may be waking up. Please wait ~30s and try again."
+        : msg;
+      setReviewError(friendly);
+      showOldMoneyToast(friendly);
     } finally {
       setIsReviewing(false);
     }

@@ -102,14 +102,25 @@ export async function fetchSessions(): Promise<SessionData[]> {
 
 export async function triggerReview(code: string, language: string): Promise<ReviewResult> {
   const headers = await getAuthHeaders();
-  const res = await fetch(`${API_URL}/review/analyze`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ code, language }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Review request failed" }));
-    throw new Error(err.error || `HTTP ${res.status}`);
+
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      const res = await fetch(`${API_URL}/review/analyze`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ code, language }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Review request failed" }));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      return res.json();
+    } catch (err: unknown) {
+      const isNetworkError = err instanceof TypeError;
+      if (!isNetworkError || attempt === 5) throw err;
+      console.warn(`Review fetch failed (attempt ${attempt}/5), retrying in 10s…`);
+      await new Promise((r) => setTimeout(r, 10000));
+    }
   }
-  return res.json();
+  throw new Error("Review request failed");
 }
