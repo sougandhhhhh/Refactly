@@ -89,6 +89,7 @@ export function EditorPage() {
                   review={reviewResult?.review ?? null}
                   isLoading={isReviewing && activeTab === "AI Review"}
                   error={reviewError}
+                  editorRef={editorRef}
                 />
               </TabsContent>
               <TabsContent value="Security">

@@ -25,17 +25,17 @@ type GraphNode = {
   fy?: number | null;
 };
 
-const fillByType: Record<string, string> = {
-  function: "#2C5038",
-  variable: "#A67C2E",
-  import: "#1C2E4A",
-};
+function nodeShape(type: string): "circle" | "rect" | "polygon" {
+  if (type.toLowerCase().includes("function") || type.toLowerCase().includes("method")) return "circle";
+  if (type.toLowerCase().includes("import") || type.toLowerCase().includes("require")) return "polygon";
+  return "rect";
+}
 
-const shapeByType: Record<string, string> = {
-  function: "circle",
-  variable: "rect",
-  import: "polygon",
-};
+function nodeFill(type: string): string {
+  if (type.toLowerCase().includes("function") || type.toLowerCase().includes("method")) return "#2C5038";
+  if (type.toLowerCase().includes("import") || type.toLowerCase().includes("require")) return "#1C2E4A";
+  return "#A67C2E";
+}
 
 export function ASTViewer({ ast, isLoading, error }: ASTViewerProps) {
   const [nodes, setNodes] = useState<GraphNode[]>([]);
@@ -120,11 +120,13 @@ export function ASTViewer({ ast, isLoading, error }: ASTViewerProps) {
               onClick={() => setActiveNode(node)}
               transform={`translate(${node.x ?? 0}, ${node.y ?? 0})`}
             >
-              {shapeByType[node.type] === "circle" ? <circle r="18" fill={fillByType[node.type]} /> : null}
-              {shapeByType[node.type] === "rect" ? <rect x="-16" y="-16" width="32" height="32" fill={fillByType[node.type]} /> : null}
-              {shapeByType[node.type] === "polygon" ? (
-                <polygon points="0,-18 18,0 0,18 -18,0" fill={fillByType[node.type]} />
-              ) : null}
+              {(() => {
+                const shape = nodeShape(node.type);
+                const fill = nodeFill(node.type);
+                return shape === "circle" ? <circle r="18" fill={fill} /> :
+                  shape === "polygon" ? <polygon points="0,-18 18,0 0,18 -18,0" fill={fill} /> :
+                    <rect x="-16" y="-16" width="32" height="32" fill={fill} />;
+              })()}
               <text y="34" textAnchor="middle" fontFamily="JetBrains Mono" fontSize="9" fill="#6B6460">
                 {node.name.replace(/^.*\s/, "")}
               </text>

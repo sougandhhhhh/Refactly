@@ -14,6 +14,7 @@ const languages = [
 
 export type MonacoEditorHandle = {
   getCode: () => string;
+  applyFix: (line: number, newCode: string) => void;
 };
 
 type MonacoEditorPanelProps = {
@@ -31,14 +32,30 @@ function greet(name: string): string {
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(
   ({ compact = false, language = "typescript", onLanguageChange }, ref) => {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+    const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
     const [minimapEnabled, setMinimapEnabled] = useState(true);
 
     useImperativeHandle(ref, () => ({
       getCode: () => editorRef.current?.getValue() || "",
+      applyFix: (line: number, newCode: string) => {
+        const ed = editorRef.current;
+        const monaco = monacoRef.current;
+        if (!ed || !monaco) return;
+        const model = ed.getModel();
+        if (!model) return;
+        const fixLines = newCode.split("\n");
+        const endLine = Math.min(line + fixLines.length - 1, model.getLineCount());
+        const endCol = model.getLineMaxColumn(endLine);
+        ed.executeEdits("fix", [{
+          range: new monaco.Range(line, 1, endLine, endCol),
+          text: newCode,
+        }]);
+      },
     }));
 
     const handleMount: OnMount = (editor, monaco) => {
       editorRef.current = editor;
+      monacoRef.current = monaco;
       monaco.editor.defineTheme("old-money-theme", oldMoneyTheme);
       monaco.editor.setTheme("old-money-theme");
     };
