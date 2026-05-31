@@ -24,7 +24,13 @@ export function EditorPage() {
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  const [fixedKeys, setFixedKeys] = useState<Set<string>>(new Set());
   const editorRef = useRef<MonacoEditorHandle>(null);
+
+  const onFixApplied = (line: number, message: string) => {
+    const key = `${line}-${message}`;
+    setFixedKeys((prev) => new Set(prev).add(key));
+  };
 
   const handleReview = async () => {
     const code = editorRef.current?.getCode();
@@ -90,6 +96,8 @@ export function EditorPage() {
                   isLoading={isReviewing && activeTab === "AI Review"}
                   error={reviewError}
                   editorRef={editorRef}
+                  fixedKeys={fixedKeys}
+                  onFixApplied={onFixApplied}
                 />
               </TabsContent>
               <TabsContent value="Security">

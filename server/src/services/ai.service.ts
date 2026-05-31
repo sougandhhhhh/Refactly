@@ -74,7 +74,7 @@ export interface AIReviewResult {
 }
 
 export async function runAIReview(code: string, language: string): Promise<AIReviewResult> {
-  const prompt = `You are a senior software engineer performing a code review. Analyze the following ${language} code and respond ONLY with valid JSON in this exact format:
+  const prompt = `You are a senior software engineer performing a code review. Analyze the following ${language} code and respond ONLY with valid JSON in this exact format. CRITICAL: Only suggest fixes that WILL INCREASE the score. Do NOT suggest cosmetic, stylistic, or unnecessary changes. If the code is clean and has no substantive issues, return an empty "suggestions" array and a score of 85-100.
 {
   "suggestions": [
     { "line": <number>, "severity": "error|warning|info", "message": "<issue>", "fix": "<corrected code snippet>" }

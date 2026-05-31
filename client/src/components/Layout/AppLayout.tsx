@@ -2,6 +2,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
+import { SmoothCursor } from "@/components/common/SmoothCursor";
 
 type AppLayoutProps = {
   children: ReactNode;
@@ -30,6 +31,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       )}
 
+      <SmoothCursor />
       <div
         style={{ paddingLeft: sidebarWidth }}
         className="min-w-0 flex-1 transition-[padding-left] duration-300 ease-linear"

@@ -11,6 +11,7 @@ type ReviewIssueItemProps = {
   message: string;
   suggestion: string;
   editorRef?: React.RefObject<MonacoEditorHandle | null>;
+  onFixApplied?: (line: number, message: string) => void;
 };
 
 const severityMap = {
@@ -19,7 +20,7 @@ const severityMap = {
   info: { icon: Info, tone: "text-navy border-navy-muted/30" },
 };
 
-export function ReviewIssueItem({ severity, line, message, suggestion, editorRef }: ReviewIssueItemProps) {
+export function ReviewIssueItem({ severity, line, message, suggestion, editorRef, onFixApplied }: ReviewIssueItemProps) {
   const [open, setOpen] = useState(false);
   const [fixDialogOpen, setFixDialogOpen] = useState(false);
   const config = severityMap[severity];
@@ -27,6 +28,7 @@ export function ReviewIssueItem({ severity, line, message, suggestion, editorRef
 
   const handleApplyFix = () => {
     editorRef?.current?.applyFix(line, suggestion);
+    onFixApplied?.(line, message);
     setFixDialogOpen(false);
     setOpen(false);
   };

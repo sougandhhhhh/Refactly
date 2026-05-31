@@ -10,9 +10,11 @@ type AIFeedbackPanelProps = {
   isLoading: boolean;
   error?: string | null;
   editorRef?: React.RefObject<MonacoEditorHandle | null>;
+  fixedKeys?: Set<string>;
+  onFixApplied?: (line: number, message: string) => void;
 };
 
-export function AIFeedbackPanel({ review, isLoading, error, editorRef }: AIFeedbackPanelProps) {
+export function AIFeedbackPanel({ review, isLoading, error, editorRef, fixedKeys, onFixApplied }: AIFeedbackPanelProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -41,12 +43,14 @@ export function AIFeedbackPanel({ review, isLoading, error, editorRef }: AIFeedb
     );
   }
 
-  const items = review.suggestions.map((s) => ({
-    line: s.line,
-    severity: s.severity,
-    message: s.message,
-    suggestion: s.fix,
-  }));
+  const items = review.suggestions
+    .filter((s) => !fixedKeys?.has(`${s.line}-${s.message}`))
+    .map((s) => ({
+      line: s.line,
+      severity: s.severity,
+      message: s.message,
+      suggestion: s.fix,
+    }));
 
   return (
     <div className="space-y-6">
@@ -69,7 +73,7 @@ export function AIFeedbackPanel({ review, isLoading, error, editorRef }: AIFeedb
 
       <section className="space-y-4">
         {items.map((issue) => (
-          <ReviewIssueItem key={`${issue.line}-${issue.message}`} {...issue} editorRef={editorRef} />
+          <ReviewIssueItem key={`${issue.line}-${issue.message}`} {...issue} editorRef={editorRef} onFixApplied={onFixApplied} />
         ))}
       </section>
     </div>

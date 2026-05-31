@@ -15,6 +15,7 @@ export default {
         stone: { 100: '#F0EBE3', 200: '#E0D8CC', 300: '#C8BDB0', 400: '#A89888', 500: '#887870' },
       },
       fontFamily: {
+        sans: ['Inter', 'Helvetica Neue', 'Arial', 'sans-serif'],
         display: ['Playfair Display', 'Georgia', 'serif'],
         body: ['EB Garamond', 'Georgia', 'serif'],
         elegant: ['Cormorant Garamond', 'Georgia', 'serif'],

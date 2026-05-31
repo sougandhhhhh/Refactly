@@ -104,7 +104,7 @@
 
 @layer components {
   .eyebrow {
-    @apply font-mono text-2xs uppercase tracking-[0.24em] text-gold;
+    @apply font-sans text-2xs uppercase tracking-[0.24em] text-gold;
   }
 
   .divider-gold {
