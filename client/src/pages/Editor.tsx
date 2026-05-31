@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { EditorToolbar } from "@/components/Editor/EditorToolbar";
 import type { MonacoEditorHandle } from "@/components/Editor/MonacoEditorPanel";
 import { AppLayout } from "@/components/Layout/AppLayout";
@@ -8,7 +8,7 @@ import { ComplexityPanel } from "@/components/Review/ComplexityPanel";
 import { SecurityPanel } from "@/components/Review/SecurityPanel";
 import { showOldMoneyToast } from "@/components/common/Toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { triggerReview, type ReviewResult } from "@/lib/api";
+import { triggerReview, warmUpServer, type ReviewResult } from "@/lib/api";
 
 const tabs = ["AI Review", "Security", "Complexity", "AST"] as const;
 const MonacoEditorPanel = lazy(async () => {
@@ -17,6 +17,8 @@ const MonacoEditorPanel = lazy(async () => {
 });
 
 export function EditorPage() {
+  useEffect(() => { warmUpServer(); }, []);
+
   const [language, setLanguage] = useState("typescript");
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
