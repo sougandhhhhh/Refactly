@@ -1,14 +1,10 @@
-import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { PageWrapper } from "@/components/Layout/PageWrapper";
-import { showOldMoneyToast } from "@/components/common/Toast";
+import { SignOutDialog } from "@/components/common/SignOutDialog";
 import { useAuth } from "@/lib/auth";
 
 export function Settings() {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const userName = user?.name || "Private Workspace";
   const userEmail = user?.email || "";
@@ -65,18 +61,7 @@ export function Settings() {
         <section className="card-old-money mt-6 border-cognac-muted/40 p-6">
           <h2 className="font-display text-2xl text-charcoal-dark">Sign Out</h2>
           <p className="mt-3 text-charcoal-light">Sign out of your Refactly account on this device.</p>
-          <Button
-            variant="ghost"
-            className="mt-5 border border-cognac-muted/50 text-cognac-dark hover:bg-cognac/10"
-            onClick={() => {
-              signOut();
-              showOldMoneyToast("You have been signed out of Refactly.");
-              navigate("/signin", { replace: true });
-            }}
-          >
-            <LogOut size={14} className="mr-2" />
-            Sign Out
-          </Button>
+          <SignOutDialog variant="settings" />
         </section>
       </PageWrapper>
     </AppLayout>

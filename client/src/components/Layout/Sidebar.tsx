@@ -1,8 +1,7 @@
-import { BarChart3, ClipboardCheck, LayoutGrid, LogOut, PanelLeft, PanelLeftClose, Settings, Sparkles } from "lucide-react";
+import { BarChart3, ClipboardCheck, LayoutGrid, PanelLeft, PanelLeftClose, Settings, Sparkles } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BrandLogo } from "@/components/common/BrandLogo";
-import { showOldMoneyToast } from "@/components/common/Toast";
-import { Button } from "@/components/ui/button";
+import { SignOutDialog } from "@/components/common/SignOutDialog";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -107,22 +106,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </div>
           )}
         </div>
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full border border-charcoal-dark/30 text-charcoal-dark hover:bg-charcoal-dark/10",
-            collapsed && "px-0",
-          )}
-          onClick={() => {
-            signOut();
-            showOldMoneyToast("You have been signed out of Refactly.");
-            navigate("/signin", { replace: true });
-          }}
-          title={collapsed ? "Sign Out" : undefined}
-        >
-          <LogOut size={14} className={collapsed ? "" : "mr-2"} />
-          {!collapsed && "Sign Out"}
-        </Button>
+        <SignOutDialog collapsed={collapsed} variant="sidebar" />
       </div>
     </aside>
   );
