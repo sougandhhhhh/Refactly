@@ -58,6 +58,7 @@ export type ASTEdge = {
 };
 
 export type ReviewResult = {
+  sessionId: string;
   review: {
     suggestions: ReviewSuggestion[];
     securityIssues: SecurityIssue[];
@@ -104,7 +105,42 @@ export async function fetchSessions(): Promise<SessionData[]> {
   return res.json();
 }
 
-export async function triggerReview(code: string, language: string): Promise<ReviewResult> {
+export async function createSession(data?: { title?: string; language?: string; code?: string }): Promise<{ id: string }> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/sessions`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data || {}),
+  });
+  if (!res.ok) throw new Error("Failed to create session");
+  return res.json();
+}
+
+export async function updateSession(id: string, data: { title?: string; language?: string; code?: string }): Promise<void> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/sessions/${id}`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update session");
+}
+
+export async function fetchSession(id: string): Promise<{
+  id: string;
+  title: string;
+  language: string;
+  code: string;
+  createdAt: string;
+  reviews: Array<{ id: string; score: number; createdAt: string }>;
+}> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/sessions/${id}`, { headers });
+  if (!res.ok) throw new Error("Failed to fetch session");
+  return res.json();
+}
+
+export async function triggerReview(code: string, language: string, sessionId?: string): Promise<ReviewResult> {
   const headers = await getAuthHeaders();
 
   for (let attempt = 1; attempt <= 5; attempt++) {
@@ -112,7 +148,7 @@ export async function triggerReview(code: string, language: string): Promise<Rev
       const res = await fetch(`${API_URL}/review/analyze`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ code, language }),
+        body: JSON.stringify({ code, language, sessionId }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Review request failed" }));

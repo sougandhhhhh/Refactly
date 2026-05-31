@@ -1,5 +1,5 @@
 import { BarChart3, ClipboardCheck, LayoutGrid, PanelLeft, PanelLeftClose, Settings, Sparkles } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { SignOutDialog } from "@/components/common/SignOutDialog";
 import { useAuth } from "@/lib/auth";
@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 const items = [
   { label: "Reviews", icon: Sparkles, href: "/editor/session-2048" },
-  { label: "Overview", icon: LayoutGrid, href: "/dashboard" },
-  { label: "Sessions", icon: ClipboardCheck, href: "/dashboard#sessions" },
-  { label: "Analytics", icon: BarChart3, href: "/dashboard#analytics" },
+  { label: "Overview", icon: LayoutGrid, href: "/overview" },
+  { label: "Sessions", icon: ClipboardCheck, href: "/sessions" },
+  { label: "Analytics", icon: BarChart3, href: "/analytics" },
   { label: "Settings", icon: Settings, href: "/settings" },
 ];
 
@@ -19,7 +19,6 @@ type SidebarProps = {
 };
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
 
@@ -32,11 +31,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     .toUpperCase()
     .slice(0, 2);
 
-  const isActive = (href: string) => {
-    const [path, hash] = href.split("#");
-    if (hash) return location.pathname === path && location.hash === `#${hash}`;
-    return location.pathname === path && !location.hash;
-  };
+  const isActive = (href: string) => window.location.pathname === href;
 
   return (
     <aside

@@ -1,5 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
@@ -27,6 +26,9 @@ type MonacoEditorPanelProps = {
   compact?: boolean;
   language?: string;
   onLanguageChange?: (lang: string) => void;
+  needsReview?: boolean;
+  onReviewClick?: () => void;
+  onCodeChange?: () => void;
 };
 
 const DEFAULT_CODE = `# Write or paste your code here, then click "Review Code"
@@ -35,10 +37,9 @@ def greet(name: str) -> str:
 `;
 
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(
-  ({ compact = false, language = "typescript", onLanguageChange }, ref) => {
+  ({ compact = false, language = "typescript", onLanguageChange, needsReview, onReviewClick, onCodeChange }, ref) => {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
-    const [minimapEnabled, setMinimapEnabled] = useState(true);
 
     useImperativeHandle(ref, () => ({
       getCode: () => editorRef.current?.getValue() || "",
@@ -65,8 +66,6 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
       monaco.editor.setTheme("old-money-theme");
     };
 
-    const langLabel = language.charAt(0).toUpperCase() + language.slice(1);
-
     return (
       <div className="card-old-money relative overflow-hidden">
         <div className="flex items-center justify-between border-b border-stone-200 bg-cream-100/80 px-5 py-3">
@@ -83,13 +82,14 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
                 <option key={value} value={value}>{label}</option>
               ))}
             </select>
-            <button
-              onClick={() => setMinimapEnabled((v) => !v)}
-              className="flex h-6 w-6 items-center justify-center rounded-sm text-stone-500 hover:bg-stone-200/60"
-              aria-label={minimapEnabled ? "Hide minimap" : "Show minimap"}
-            >
-              {minimapEnabled ? <Eye size={14} /> : <EyeOff size={14} />}
-            </button>
+            {needsReview && (
+              <button
+                onClick={onReviewClick}
+                className="animate-pulse-gold rounded-sm bg-gold px-3 py-1 font-mono text-2xs uppercase tracking-[0.18em] text-cream-50 shadow-gold-glow"
+              >
+                Review Code
+              </button>
+            )}
           </div>
         </div>
         <div className={compact ? "h-[500px]" : "h-[calc(100vh-120px)]"}>
@@ -98,10 +98,11 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
             language={language}
             defaultValue={DEFAULT_CODE}
             onMount={handleMount}
+            onChange={() => onCodeChange?.()}
             options={{
               fontFamily: "JetBrains Mono",
               fontSize: 13,
-              minimap: { enabled: minimapEnabled },
+              minimap: { enabled: false },
               scrollBeyondLastLine: false,
               smoothScrolling: true,
               padding: { top: 18, bottom: 18 },
@@ -110,9 +111,6 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
               lineDecorationsWidth: 14,
             }}
           />
-        </div>
-        <div className="flex items-center justify-between border-t border-stone-200 bg-cream-100/80 px-5 py-2 font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
-          <span>{langLabel}</span>
         </div>
       </div>
     );

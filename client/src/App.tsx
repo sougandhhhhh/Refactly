@@ -49,6 +49,18 @@ const SettingsPage = lazy(async () => {
   const module = await import("@/pages/Settings");
   return { default: module.Settings };
 });
+const Overview = lazy(async () => {
+  const module = await import("@/pages/Overview");
+  return { default: module.Overview };
+});
+const SessionsPage = lazy(async () => {
+  const module = await import("@/pages/SessionsPage");
+  return { default: module.SessionsPage };
+});
+const Analytics = lazy(async () => {
+  const module = await import("@/pages/Analytics");
+  return { default: module.Analytics };
+});
 
 export default function App() {
   return (
@@ -101,6 +113,30 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/overview"
+            element={
+              <ProtectedRoute>
+                <Overview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sessions"
+            element={
+              <ProtectedRoute>
+                <SessionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
               </ProtectedRoute>
             }
           />

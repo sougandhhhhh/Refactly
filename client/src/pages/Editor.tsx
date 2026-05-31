@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { EditorToolbar } from "@/components/Editor/EditorToolbar";
 import type { MonacoEditorHandle } from "@/components/Editor/MonacoEditorPanel";
 import { AppLayout } from "@/components/Layout/AppLayout";
@@ -8,7 +9,7 @@ import { ComplexityPanel } from "@/components/Review/ComplexityPanel";
 import { SecurityPanel } from "@/components/Review/SecurityPanel";
 import { showOldMoneyToast } from "@/components/common/Toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { triggerReview, warmUpServer, type ReviewResult } from "@/lib/api";
+import { createSession, fetchSession, triggerReview, updateSession, warmUpServer, type ReviewResult } from "@/lib/api";
 
 const tabs = ["AI Review", "Security", "Complexity", "AST"] as const;
 const MonacoEditorPanel = lazy(async () => {
@@ -16,8 +17,26 @@ const MonacoEditorPanel = lazy(async () => {
   return { default: module.MonacoEditorPanel };
 });
 
+function generateTitleFromCode(code: string): string {
+  const lines = code.split("\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const fnMatch = trimmed.match(/(?:def|function|fn|func)\s+(\w+)/);
+    if (fnMatch) return fnMatch[1];
+    const classMatch = trimmed.match(/class\s+(\w+)/);
+    if (classMatch) return classMatch[1];
+    const commentMatch = trimmed.match(/#\s*(.+)/);
+    if (commentMatch) return commentMatch[1].slice(0, 60);
+  }
+  const words = code.replace(/[^a-zA-Z ]/g, " ").split(/\s+/).filter(Boolean);
+  return words.slice(0, 6).join(" ").slice(0, 60) || "Untitled Session";
+}
+
 export function EditorPage() {
   useEffect(() => { warmUpServer(); }, []);
+
+  const { sessionId } = useParams<{ sessionId: string }>();
+  const navigate = useNavigate();
 
   const [language, setLanguage] = useState("python");
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
@@ -25,14 +44,63 @@ export function EditorPage() {
   const [isReviewing, setIsReviewing] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [fixedKeys, setFixedKeys] = useState<Set<string>>(new Set());
+  const [needsReview, setNeedsReview] = useState(false);
+  const [title, setTitle] = useState("Untitled Session");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [dbSessionId, setDbSessionId] = useState<string | null>(null);
   const editorRef = useRef<MonacoEditorHandle>(null);
+  const titleRef = useRef(title);
+  titleRef.current = title;
+
+  // Load or create session on mount
+  useEffect(() => {
+    if (!sessionId || sessionId === "session-2048") {
+      createSession({ language, code: editorRef.current?.getCode() })
+        .then((s) => {
+          setDbSessionId(s.id);
+          navigate(`/editor/${s.id}`, { replace: true });
+        })
+        .catch(() => {/* silently fail */});
+    } else {
+      fetchSession(sessionId)
+        .then((s) => {
+          setDbSessionId(s.id);
+          setTitle(s.title);
+          setLanguage(s.language);
+        })
+        .catch(() => {
+          createSession({ language, code: editorRef.current?.getCode() })
+            .then((s) => {
+              setDbSessionId(s.id);
+              navigate(`/editor/${s.id}`, { replace: true });
+            })
+            .catch(() => {/* silently fail */});
+        });
+    }
+  }, [sessionId]);
 
   const onFixApplied = (line: number, message: string) => {
     const key = `${line}-${message}`;
     setFixedKeys((prev) => new Set(prev).add(key));
+    setNeedsReview(true);
   };
 
+  const handleNewSession = useCallback(() => {
+    createSession({ language, code: editorRef.current?.getCode() })
+      .then((s) => {
+        setDbSessionId(s.id);
+        setTitle("Untitled Session");
+        setReviewResult(null);
+        setReviewError(null);
+        setFixedKeys(new Set());
+        setNeedsReview(false);
+        navigate(`/editor/${s.id}`);
+      })
+      .catch(() => showOldMoneyToast("Failed to create new session"));
+  }, [language, navigate]);
+
   const handleReview = async () => {
+    setNeedsReview(false);
     const code = editorRef.current?.getCode();
     if (!code) {
       showOldMoneyToast("No code to review.");
@@ -43,8 +111,23 @@ export function EditorPage() {
     setReviewResult(null);
     setActiveTab("AI Review");
     try {
-      const result = await triggerReview(code, language);
+      const result = await triggerReview(code, language, dbSessionId ?? undefined);
       setReviewResult(result);
+
+      // Persist session id from response
+      if (result.sessionId && result.sessionId !== dbSessionId) {
+        setDbSessionId(result.sessionId);
+        navigate(`/editor/${result.sessionId}`, { replace: true });
+      }
+
+      // Auto-name session if still untitled
+      if (titleRef.current === "Untitled Session") {
+        const generated = generateTitleFromCode(code);
+        setTitle(generated);
+        const sid = result.sessionId || dbSessionId;
+        if (sid) updateSession(sid, { title: generated }).catch(() => {});
+      }
+
       showOldMoneyToast(`Review complete — score: ${result.review.score}/100`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Review failed";
@@ -58,9 +141,29 @@ export function EditorPage() {
     }
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+  };
+
+  const handleFinishEdit = () => {
+    setIsEditingTitle(false);
+    if (dbSessionId && title !== "Untitled Session") {
+      updateSession(dbSessionId, { title }).catch(() => {});
+    }
+  };
+
   return (
     <AppLayout>
-      <EditorToolbar onReviewClick={handleReview} isReviewing={isReviewing} />
+      <EditorToolbar
+        title={title}
+        isEditingTitle={isEditingTitle}
+        onStartEdit={() => setIsEditingTitle(true)}
+        onTitleChange={handleTitleChange}
+        onFinishEdit={handleFinishEdit}
+        onReviewClick={handleReview}
+        onNewSession={handleNewSession}
+        isReviewing={isReviewing}
+      />
       <div className="grid min-h-[calc(100vh-64px)] xl:grid-cols-[1.55fr_1fr]">
         <div className="border-r border-stone-200 p-3 sm:p-4">
           <Suspense
@@ -75,7 +178,14 @@ export function EditorPage() {
               </div>
             }
           >
-            <MonacoEditorPanel ref={editorRef} language={language} onLanguageChange={setLanguage} />
+            <MonacoEditorPanel
+              ref={editorRef}
+              language={language}
+              onLanguageChange={setLanguage}
+              needsReview={needsReview}
+              onReviewClick={handleReview}
+              onCodeChange={() => setNeedsReview(true)}
+            />
           </Suspense>
         </div>
         <aside className="overflow-y-auto border-t border-stone-200 bg-cream-100/80 xl:border-t-0">
