@@ -29,10 +29,9 @@ type MonacoEditorPanelProps = {
   onLanguageChange?: (lang: string) => void;
 };
 
-const DEFAULT_CODE = `// Write or paste your code here, then click "Review Code"
-function greet(name: string): string {
-  return \`Hello, \${name}!\`;
-}
+const DEFAULT_CODE = `# Write or paste your code here, then click "Review Code"
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
 `;
 
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(

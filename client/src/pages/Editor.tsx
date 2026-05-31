@@ -19,7 +19,7 @@ const MonacoEditorPanel = lazy(async () => {
 export function EditorPage() {
   useEffect(() => { warmUpServer(); }, []);
 
-  const [language, setLanguage] = useState("typescript");
+  const [language, setLanguage] = useState("python");
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
