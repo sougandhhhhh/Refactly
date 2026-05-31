@@ -49,12 +49,7 @@ export function EditorPage() {
 
   return (
     <AppLayout>
-      <EditorToolbar
-        language={language}
-        onLanguageChange={setLanguage}
-        onReviewClick={handleReview}
-        isReviewing={isReviewing}
-      />
+      <EditorToolbar onReviewClick={handleReview} isReviewing={isReviewing} />
       <div className="grid min-h-[calc(100vh-64px)] xl:grid-cols-[1.55fr_1fr]">
         <div className="border-r border-stone-200 p-3 sm:p-4">
           <Suspense
@@ -69,7 +64,7 @@ export function EditorPage() {
               </div>
             }
           >
-            <MonacoEditorPanel ref={editorRef} language={language} />
+            <MonacoEditorPanel ref={editorRef} language={language} onLanguageChange={setLanguage} />
           </Suspense>
         </div>
         <aside className="overflow-y-auto border-t border-stone-200 bg-cream-100/80 xl:border-t-0">

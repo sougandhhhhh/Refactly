@@ -5,6 +5,13 @@ import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { oldMoneyTheme } from "@/lib/monacoTheme";
 
+const languages = [
+  { value: "typescript", label: "TypeScript" },
+  { value: "go", label: "Go" },
+  { value: "python", label: "Python" },
+  { value: "rust", label: "Rust" },
+];
+
 export type MonacoEditorHandle = {
   getCode: () => string;
 };
@@ -12,6 +19,7 @@ export type MonacoEditorHandle = {
 type MonacoEditorPanelProps = {
   compact?: boolean;
   language?: string;
+  onLanguageChange?: (lang: string) => void;
 };
 
 const DEFAULT_CODE = `// Write or paste your code here, then click "Review Code"
@@ -21,7 +29,7 @@ function greet(name: string): string {
 `;
 
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(
-  ({ compact = false, language = "typescript" }, ref) => {
+  ({ compact = false, language = "typescript", onLanguageChange }, ref) => {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const [minimapEnabled, setMinimapEnabled] = useState(true);
 
@@ -43,13 +51,24 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
           <span className="font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
             live-review.{language}
           </span>
-          <button
-            onClick={() => setMinimapEnabled((v) => !v)}
-            className="flex h-6 w-6 items-center justify-center rounded-sm text-stone-500 hover:bg-stone-200/60"
-            aria-label={minimapEnabled ? "Hide minimap" : "Show minimap"}
-          >
-            {minimapEnabled ? <Eye size={14} /> : <EyeOff size={14} />}
-          </button>
+          <div className="flex items-center gap-2">
+            <select
+              value={language}
+              onChange={(e) => onLanguageChange?.(e.target.value)}
+              className="cursor-pointer bg-transparent font-mono text-2xs uppercase tracking-[0.18em] text-stone-500 outline-none hover:text-stone-700"
+            >
+              {languages.map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => setMinimapEnabled((v) => !v)}
+              className="flex h-6 w-6 items-center justify-center rounded-sm text-stone-500 hover:bg-stone-200/60"
+              aria-label={minimapEnabled ? "Hide minimap" : "Show minimap"}
+            >
+              {minimapEnabled ? <Eye size={14} /> : <EyeOff size={14} />}
+            </button>
+          </div>
         </div>
         <div className={compact ? "h-[500px]" : "h-[calc(100vh-120px)]"}>
           <Editor

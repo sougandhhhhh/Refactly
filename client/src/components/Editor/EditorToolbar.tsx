@@ -1,7 +1,7 @@
 import { PencilLine } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 const languages = [
   { value: "typescript", label: "TypeScript" },
@@ -11,13 +11,11 @@ const languages = [
 ];
 
 type EditorToolbarProps = {
-  language: string;
-  onLanguageChange: (lang: string) => void;
   onReviewClick?: () => void;
   isReviewing?: boolean;
 };
 
-export function EditorToolbar({ language, onLanguageChange, onReviewClick, isReviewing }: EditorToolbarProps) {
+export function EditorToolbar({ onReviewClick, isReviewing }: EditorToolbarProps) {
   const [title, setTitle] = useState("Untitled Session");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
@@ -45,21 +43,9 @@ export function EditorToolbar({ language, onLanguageChange, onReviewClick, isRev
           </button>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <Select value={language} onValueChange={onLanguageChange}>
-          <SelectTrigger className="w-full sm:w-auto">
-            <SelectValue placeholder="Language" />
-          </SelectTrigger>
-          <SelectContent>
-            {languages.map(({ value, label }) => (
-              <SelectItem key={value} value={value}>{label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button className="w-full py-2 sm:w-auto" onClick={onReviewClick} disabled={isReviewing}>
-          {isReviewing ? "Reviewing..." : "Review Code"}
-        </Button>
-      </div>
+      <Button className="w-full py-2 sm:w-auto" onClick={onReviewClick} disabled={isReviewing}>
+        {isReviewing ? "Reviewing..." : "Review Code"}
+      </Button>
     </div>
   );
 }
