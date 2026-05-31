@@ -1,61 +1,77 @@
 import { config } from "../config";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const MODEL = "gemini-2.0-flash";
+const MODELS = ["gemini-1.5-flash", "gemini-2.0-flash"];
+
+const responseCache = new Map<string, { result: string; expiry: number }>();
+const CACHE_TTL = 5 * 60 * 1000;
+
+function cacheKey(prompt: string): string {
+  let hash = 5381;
+  for (let i = 0; i < prompt.length; i++) {
+    hash = ((hash << 5) + hash + prompt.charCodeAt(i)) & 0x7fffffff;
+  }
+  return String(hash);
+}
 
 async function geminiRequest(prompt: string): Promise<string> {
   if (!config.google.apiKey) {
     throw new Error("GOOGLE_AI_API_KEY is not set on the server");
   }
 
-  let lastErr: Error | null = null;
-  for (let attempt = 1; attempt <= 8; attempt++) {
-    try {
-      const res = await fetch(
-        `${GEMINI_BASE}/${MODEL}:generateContent?key=${config.google.apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
-          }),
+  const ck = cacheKey(prompt);
+  const cached = responseCache.get(ck);
+  if (cached && cached.expiry > Date.now()) {
+    console.log("Gemini cache hit");
+    return cached.result;
+  }
+
+  for (const model of MODELS) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const res = await fetch(
+          `${GEMINI_BASE}/${model}:generateContent?key=${config.google.apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
+            }),
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!text) throw new Error("No response from AI");
+          responseCache.set(ck, { result: text, expiry: Date.now() + CACHE_TTL });
+          return text;
         }
-      );
 
-      if (res.ok) {
-        const data = await res.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text) throw new Error("No response from AI");
-        return text;
-      }
+        const is429 = res.status === 429;
+        if (is429) {
+          const wait = Math.min(2000 * 2 ** attempt, 15000);
+          console.warn(`${model} rate limited (429), attempt ${attempt}/3 for this model, waiting ${wait}ms`);
+          await new Promise((r) => setTimeout(r, wait));
+          continue;
+        }
 
-      if (res.status === 429) {
-        lastErr = new Error(`429 status code (no body)`);
-        const delay = Math.min(2000 * 2 ** attempt, 30000);
-        console.warn(`Gemini rate limited (429), retry ${attempt}/8 in ${delay}ms`);
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
+        const body = await res.text().catch(() => "");
+        throw new Error(`Gemini API error ${res.status}: ${body || "(no body)"}`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "";
+        if (msg.startsWith("Gemini API error")) throw err;
+        if (msg.startsWith("429")) {
+          const wait = Math.min(2000 * 2 ** attempt, 15000);
+          await new Promise((r) => setTimeout(r, wait));
+          continue;
+        }
+        throw err;
       }
-
-      const body = await res.text().catch(() => "");
-      throw new Error(`Gemini API error ${res.status}: ${body || "(no body)"}`);
-    } catch (err: unknown) {
-      if (err && typeof err === "object" && (err as Error).message?.startsWith("Gemini API error")) {
-        throw err; // non-429, fail fast
-      }
-      if (err && typeof err === "object" && (err as Error).message?.startsWith("429")) {
-        lastErr = err as Error;
-        continue; // already handled above, but catch network errors here
-      }
-      // network error — retry
-      lastErr = err as Error;
-      const delay = Math.min(2000 * 2 ** attempt, 30000);
-      console.warn(`Gemini request failed (${(err as Error).message}), retry ${attempt}/8 in ${delay}ms`);
-      await new Promise((r) => setTimeout(r, delay));
     }
   }
-  throw lastErr || new Error("Gemini request failed after 8 retries");
+  throw new Error("429 status code (no body) — all models exhausted");
 }
 
 export interface AIReviewResult {
