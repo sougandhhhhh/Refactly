@@ -65,16 +65,12 @@ export function EditorPage() {
       fetchSession(sessionId)
         .then((s) => {
           setDbSessionId(s.id);
-          setTitle(s.title);
+          setTitle(s.title || "Untitled Session");
           setLanguage(s.language);
         })
         .catch(() => {
-          createSession({ language, code: editorRef.current?.getCode() })
-            .then((s) => {
-              setDbSessionId(s.id);
-              navigate(`/editor/${s.id}`, { replace: true });
-            })
-            .catch(() => {/* silently fail */});
+          // Ephemeral or failed fetch — keep the id, use defaults
+          setDbSessionId(sessionId);
         });
     }
   }, [sessionId]);
@@ -86,18 +82,22 @@ export function EditorPage() {
   };
 
   const handleNewSession = useCallback(() => {
-    createSession({ language, code: editorRef.current?.getCode() })
+    const defaultCode = `# Write or paste your code here, then click "Review Code"\ndef greet(name: str) -> str:\n    return f"Hello, {name}!"\n`;
+    const defaultLang = "python";
+    createSession({ language: defaultLang, code: defaultCode })
       .then((s) => {
         setDbSessionId(s.id);
         setTitle("Untitled Session");
+        setLanguage(defaultLang);
         setReviewResult(null);
         setReviewError(null);
         setFixedKeys(new Set());
         setNeedsReview(false);
+        editorRef.current?.setCode(defaultCode);
         navigate(`/editor/${s.id}`);
       })
       .catch(() => showOldMoneyToast("Failed to create new session"));
-  }, [language, navigate]);
+  }, [navigate]);
 
   const handleReview = async () => {
     setNeedsReview(false);

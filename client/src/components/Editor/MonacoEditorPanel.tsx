@@ -19,6 +19,7 @@ const languages = [
 
 export type MonacoEditorHandle = {
   getCode: () => string;
+  setCode: (code: string) => void;
   applyFix: (line: number, newCode: string) => void;
 };
 
@@ -43,6 +44,13 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
 
     useImperativeHandle(ref, () => ({
       getCode: () => editorRef.current?.getValue() || "",
+      setCode: (code: string) => {
+        const ed = editorRef.current;
+        if (ed) {
+          const model = ed.getModel();
+          if (model) model.setValue(code);
+        }
+      },
       applyFix: (line: number, newCode: string) => {
         const ed = editorRef.current;
         const monaco = monacoRef.current;
