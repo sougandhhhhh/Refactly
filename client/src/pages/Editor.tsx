@@ -25,11 +25,8 @@ function generateTitleFromCode(code: string): string {
     if (fnMatch) return fnMatch[1];
     const classMatch = trimmed.match(/class\s+(\w+)/);
     if (classMatch) return classMatch[1];
-    const commentMatch = trimmed.match(/#\s*(.+)/);
-    if (commentMatch) return commentMatch[1].slice(0, 60);
   }
-  const words = code.replace(/[^a-zA-Z ]/g, " ").split(/\s+/).filter(Boolean);
-  return words.slice(0, 6).join(" ").slice(0, 60) || "Untitled Session";
+  return "Untitled Session";
 }
 
 export function EditorPage() {
