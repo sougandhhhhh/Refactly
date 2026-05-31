@@ -1,12 +1,24 @@
 import { Response } from "express";
-import { PrismaClient } from "@prisma/client";
-import { v4 as uuidv4 } from "uuid";
 import { AuthRequest } from "../middleware/auth.middleware";
 
-const prisma = new PrismaClient();
+async function getPrisma() {
+  const { PrismaClient } = await import("@prisma/client");
+  return new PrismaClient();
+}
+
+function dbUnavailable(res: Response) {
+  return res.status(503).json({ error: "Database not configured" });
+}
 
 export async function createSession(req: AuthRequest, res: Response) {
+  if (!process.env.DATABASE_URL) {
+    // Return a fake session id so the UI can proceed ephemerally
+    const { v4 } = await import("uuid");
+    return res.status(201).json({ id: `ephemeral-${v4()}`, title: req.body.title || "Untitled Session", language: req.body.language || "javascript", code: req.body.code || "", createdAt: new Date().toISOString() });
+  }
   try {
+    const prisma = await getPrisma();
+    const { v4 } = await import("uuid");
     const { title, language, code } = req.body;
     const session = await prisma.session.create({
       data: {
@@ -14,9 +26,10 @@ export async function createSession(req: AuthRequest, res: Response) {
         language: language || "javascript",
         code: code || "",
         ownerId: req.userId!,
-        shareToken: uuidv4(),
+        shareToken: v4(),
       },
     });
+    await prisma.$disconnect();
     res.status(201).json(session);
   } catch (error) {
     console.error("Create session error:", error);
@@ -25,7 +38,9 @@ export async function createSession(req: AuthRequest, res: Response) {
 }
 
 export async function getSessions(req: AuthRequest, res: Response) {
+  if (!process.env.DATABASE_URL) return dbUnavailable(res);
   try {
+    const prisma = await getPrisma();
     const sessions = await prisma.session.findMany({
       where: { ownerId: req.userId },
       orderBy: { updatedAt: "desc" },
@@ -34,6 +49,7 @@ export async function getSessions(req: AuthRequest, res: Response) {
         _count: { select: { comments: true } },
       },
     });
+    await prisma.$disconnect();
     res.json(sessions);
   } catch (error) {
     console.error("Get sessions error:", error);
@@ -42,7 +58,9 @@ export async function getSessions(req: AuthRequest, res: Response) {
 }
 
 export async function getSession(req: AuthRequest, res: Response) {
+  if (!process.env.DATABASE_URL) return dbUnavailable(res);
   try {
+    const prisma = await getPrisma();
     const id = req.params.id as string;
     const session = await prisma.session.findUnique({
       where: { id },
@@ -51,6 +69,7 @@ export async function getSession(req: AuthRequest, res: Response) {
         comments: { include: { user: { select: { id: true, name: true, avatar: true } } } },
       },
     });
+    await prisma.$disconnect();
 
     if (!session) {
       return res.status(404).json({ error: "Session not found" });
@@ -68,23 +87,28 @@ export async function getSession(req: AuthRequest, res: Response) {
 }
 
 export async function updateSession(req: AuthRequest, res: Response) {
+  if (!process.env.DATABASE_URL) return dbUnavailable(res);
   try {
+    const prisma = await getPrisma();
     const id = req.params.id as string;
     const { title, language, code } = req.body;
 
     const session = await prisma.session.findUnique({ where: { id } });
     if (!session) {
+      await prisma.$disconnect();
       return res.status(404).json({ error: "Session not found" });
     }
     if (session.ownerId !== req.userId) {
+      await prisma.$disconnect();
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    const updated = await prisma.session.update({
+    await prisma.session.update({
       where: { id },
       data: { title, language, code },
     });
-    res.json(updated);
+    await prisma.$disconnect();
+    res.json({ message: "Session updated" });
   } catch (error) {
     console.error("Update session error:", error);
     res.status(500).json({ error: "Failed to update session" });
@@ -92,17 +116,22 @@ export async function updateSession(req: AuthRequest, res: Response) {
 }
 
 export async function deleteSession(req: AuthRequest, res: Response) {
+  if (!process.env.DATABASE_URL) return dbUnavailable(res);
   try {
+    const prisma = await getPrisma();
     const id = req.params.id as string;
     const session = await prisma.session.findUnique({ where: { id } });
     if (!session) {
+      await prisma.$disconnect();
       return res.status(404).json({ error: "Session not found" });
     }
     if (session.ownerId !== req.userId) {
+      await prisma.$disconnect();
       return res.status(403).json({ error: "Not authorized" });
     }
 
     await prisma.session.delete({ where: { id } });
+    await prisma.$disconnect();
     res.json({ message: "Session deleted" });
   } catch (error) {
     console.error("Delete session error:", error);
@@ -111,7 +140,9 @@ export async function deleteSession(req: AuthRequest, res: Response) {
 }
 
 export async function getSessionByShareToken(req: AuthRequest, res: Response) {
+  if (!process.env.DATABASE_URL) return dbUnavailable(res);
   try {
+    const prisma = await getPrisma();
     const token = req.params.token as string;
     const session = await prisma.session.findUnique({
       where: { shareToken: token },
@@ -120,6 +151,7 @@ export async function getSessionByShareToken(req: AuthRequest, res: Response) {
         owner: { select: { id: true, name: true, avatar: true } },
       },
     });
+    await prisma.$disconnect();
 
     if (!session) {
       return res.status(404).json({ error: "Session not found" });
