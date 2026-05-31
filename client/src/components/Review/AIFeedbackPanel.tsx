@@ -52,23 +52,26 @@ export function AIFeedbackPanel({ review, isLoading, error, editorRef, fixedKeys
       suggestion: s.fix,
     }));
 
+  const scoreTone =
+    review.score >= 85
+      ? "bg-forest/10 text-forest-dark border-forest-muted/40"
+      : review.score >= 41
+        ? "bg-gold/10 text-gold-dark border-gold-muted/50"
+        : "bg-cognac/10 text-cognac-dark border-cognac-muted/40";
+
   return (
     <div className="space-y-6">
       <section className="card-old-money p-6">
-        <p className="eyebrow">Overall Score</p>
-        <div className="mt-6 flex items-center gap-6">
-          <div className="flex h-32 w-32 items-center justify-center rounded-sm border border-gold-muted/40 bg-gradient-to-b from-cream-50 to-stone-100 shadow-old-money">
-            <span className="font-display text-5xl text-charcoal-dark">
-              <NumberFlow value={review.score} />
-            </span>
-          </div>
-          <div className="flex-1">
-            <p className="font-elegant text-3xl italic leading-tight text-charcoal-light">
-              {review.summary}
-            </p>
-            <Progress value={review.score} className="mt-5" />
-          </div>
+        <div className="flex items-center gap-4">
+          <p className="eyebrow">Overall Score</p>
+          <span className={`rounded-sm border px-3 py-1 font-mono text-sm font-medium ${scoreTone}`}>
+            <NumberFlow value={review.score} />/100
+          </span>
         </div>
+        <p className="mt-4 font-elegant text-3xl italic leading-tight text-charcoal-light">
+          {review.summary}
+        </p>
+        <Progress value={review.score} className="mt-5" />
       </section>
 
       <section className="space-y-4">

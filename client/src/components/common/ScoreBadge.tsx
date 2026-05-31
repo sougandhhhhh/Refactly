@@ -6,9 +6,9 @@ type ScoreBadgeProps = {
 
 export function ScoreBadge({ score }: ScoreBadgeProps) {
   const tone =
-    score > 80
+    score >= 85
       ? "border-forest-muted/40 bg-forest/10 text-forest-dark"
-      : score >= 60
+      : score >= 41
         ? "border-gold-muted/50 bg-gold/10 text-gold-dark"
         : "border-cognac-muted/40 bg-cognac/10 text-cognac-dark";
 
