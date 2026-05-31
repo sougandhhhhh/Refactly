@@ -54,17 +54,17 @@ export function AIFeedbackPanel({ review, isLoading, error, editorRef, fixedKeys
 
   const scoreTone =
     review.score >= 85
-      ? "bg-forest/10 text-forest-dark border-forest-muted/40"
+      ? "border-forest-muted/40 bg-forest/10 text-forest-dark shadow-[0_0_14px_rgba(44,80,56,0.25)]"
       : review.score >= 41
-        ? "bg-gold/10 text-gold-dark border-gold-muted/50"
-        : "bg-cognac/10 text-cognac-dark border-cognac-muted/40";
+        ? "border-gold-muted/50 bg-gold/10 text-gold-dark shadow-[0_0_14px_rgba(166,124,46,0.25)]"
+        : "border-cognac-muted/40 bg-cognac/10 text-cognac-dark shadow-[0_0_14px_rgba(107,51,32,0.25)]";
 
   return (
     <div className="space-y-6">
       <section className="card-old-money p-6">
         <div className="flex items-center gap-4">
           <p className="eyebrow">Overall Score</p>
-          <span className={`rounded-sm border px-3 py-1 font-mono text-sm font-medium ${scoreTone}`}>
+          <span className={`rounded-sm border-2 px-3 py-1 font-mono text-sm font-medium ${scoreTone}`}>
             <NumberFlow value={review.score} />/100
           </span>
         </div>
