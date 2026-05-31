@@ -45,6 +45,10 @@ const TermsOfService = lazy(async () => {
   const module = await import("@/pages/TermsOfService");
   return { default: module.TermsOfService };
 });
+const SettingsPage = lazy(async () => {
+  const module = await import("@/pages/Settings");
+  return { default: module.Settings };
+});
 
 export default function App() {
   return (
@@ -92,6 +96,14 @@ export default function App() {
             }
           />
           <Route path="/editor" element={<Navigate to="/editor/session-2048" replace />} />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<Navigate to="/" replace />} />

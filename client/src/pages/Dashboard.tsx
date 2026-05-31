@@ -79,10 +79,7 @@ export function Dashboard() {
               <h2 className="eyebrow mb-6">Analytics</h2>
               <ScoreChart scoreHistory={stats?.scoreHistory ?? []} />
             </section>
-            <section id="settings" className="mt-10 scroll-mt-20">
-              <h2 className="eyebrow mb-6">Settings</h2>
-              <p className="text-charcoal-light">Account settings and preferences.</p>
-            </section>
+
           </>
         )}
       </PageWrapper>

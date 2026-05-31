@@ -24,7 +24,9 @@ export function EditorToolbar({ language, onLanguageChange, onReviewClick, isRev
   return (
     <div className="flex flex-col gap-4 border-b border-stone-200 bg-white px-4 py-4 sm:px-5 lg:h-12 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:py-0">
       <div className="flex min-w-0 items-center gap-3">
-        <PencilLine size={16} className="text-gold" />
+        <button onClick={() => setIsEditingTitle(true)} className="shrink-0" aria-label="Edit title">
+          <PencilLine size={16} className="text-gold" />
+        </button>
         {isEditingTitle ? (
           <input
             autoFocus

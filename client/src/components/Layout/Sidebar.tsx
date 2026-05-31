@@ -11,7 +11,7 @@ const items = [
   { label: "Overview", icon: LayoutGrid, href: "/dashboard" },
   { label: "Sessions", icon: ClipboardCheck, href: "/dashboard#sessions" },
   { label: "Analytics", icon: BarChart3, href: "/dashboard#analytics" },
-  { label: "Settings", icon: Settings, href: "/dashboard#settings" },
+  { label: "Settings", icon: Settings, href: "/settings" },
 ];
 
 type SidebarProps = {
