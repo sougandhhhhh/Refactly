@@ -1,51 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+
+const CURSOR_SVG = encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 20 24"><path d="M 1 1 L 15 11 L 10 11 L 8 23 L 6 23 L 8 11 L 1 11 Z" fill="#1A1614"/></svg>`
+);
 
 export function SmoothCursor() {
-  const [pos, setPos] = useState({ x: -100, y: -100 });
-  const [isVisible, setIsVisible] = useState(true);
-
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const checkDevice = () => {
-      const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-      setIsVisible(!isTouch);
-    };
-    checkDevice();
-    window.addEventListener("resize", checkDevice);
-    return () => window.removeEventListener("resize", checkDevice);
+    const url = `url("data:image/svg+xml,${CURSOR_SVG}") 1 1, auto`;
+    document.body.style.cursor = url;
+    return () => { document.body.style.cursor = "auto"; };
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !isVisible) return;
-    const handler = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
-    document.body.style.cursor = "none";
-    window.addEventListener("mousemove", handler);
-    return () => {
-      window.removeEventListener("mousemove", handler);
-      document.body.style.cursor = "auto";
-    };
-  }, [isVisible]);
-
-  if (!isVisible) return null;
-
-  return (
-    <>
-      <style>{`* { cursor: none !important; }`}</style>
-      <div
-        style={{
-          position: "fixed",
-          top: pos.y,
-          left: pos.x,
-          zIndex: 999999,
-          pointerEvents: "none",
-          width: 10,
-          height: 10,
-          marginLeft: -5,
-          marginTop: -5,
-          borderRadius: "50%",
-          background: "#1A1614",
-        }}
-      />
-    </>
-  );
+  return null;
 }
