@@ -242,19 +242,20 @@ export function EditorPage() {
       const result = await triggerReview(code, language, dbSessionId ?? undefined);
       setReviewResult(result);
 
+      const newSid = (result.sessionId && result.sessionId !== dbSessionId) ? result.sessionId : dbSessionId;
+
+      // Auto-name session if still untitled (before navigation to prevent fetch override)
+      if (titleRef.current === "Untitled Session") {
+        const generated = generateTitleFromCode(code);
+        setTitle(generated);
+        if (newSid) await updateSession(newSid, { title: generated }).catch(() => {});
+      }
+
       // Persist session id from response
       if (result.sessionId && result.sessionId !== dbSessionId) {
         setDbSessionId(result.sessionId);
         localStorage.setItem(getCodeKey(result.sessionId), code);
         navigate(`/editor/${result.sessionId}`, { replace: true });
-      }
-
-      // Auto-name session if still untitled
-      if (titleRef.current === "Untitled Session") {
-        const generated = generateTitleFromCode(code);
-        setTitle(generated);
-        const sid = result.sessionId || dbSessionId;
-        if (sid) updateSession(sid, { title: generated }).catch(() => {});
       }
 
       showOldMoneyToast(`Review complete — score: ${result.review.score}/100`);
