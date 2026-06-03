@@ -136,7 +136,7 @@ export function EditorPage() {
   const [title, setTitle] = useState("Untitled Session");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [dbSessionId, setDbSessionId] = useState<string | null>(null);
-  const [editorCode, setEditorCode] = useState("");
+  const [editorCode, setEditorCode] = useState(SAMPLE_CODES.python);
   const editorRef = useRef<MonacoEditorHandle>(null);
   const titleRef = useRef(title);
   titleRef.current = title;

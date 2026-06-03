@@ -75,6 +75,7 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
       monacoRef.current = monaco;
       monaco.editor.defineTheme("old-money-theme", oldMoneyTheme);
       monaco.editor.setTheme("old-money-theme");
+      if (code) editor.setValue(code);
     };
 
     return (
