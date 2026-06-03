@@ -112,10 +112,14 @@ function generateTitleFromCode(code: string): string {
   const lines = code.split("\n");
   for (const line of lines) {
     const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("//") || trimmed.startsWith("#") || trimmed.startsWith("/*") || trimmed.startsWith("*")) continue;
     const fnMatch = trimmed.match(/(?:def|function|fn|func)\s+(\w+)/);
     if (fnMatch) return fnMatch[1];
     const classMatch = trimmed.match(/class\s+(\w+)/);
     if (classMatch) return classMatch[1];
+    // Use first meaningful line of code (up to 50 chars)
+    const clean = trimmed.replace(/[^a-zA-Z0-9_ ]/g, "").trim();
+    if (clean.length > 3) return clean.slice(0, 50);
   }
   return "Untitled Session";
 }
@@ -247,8 +251,10 @@ export function EditorPage() {
       // Auto-name session if still untitled (before navigation to prevent fetch override)
       if (titleRef.current === "Untitled Session") {
         const generated = generateTitleFromCode(code);
-        setTitle(generated);
-        if (newSid) await updateSession(newSid, { title: generated }).catch(() => {});
+        if (generated !== "Untitled Session") {
+          setTitle(generated);
+          if (newSid) await updateSession(newSid, { title: generated }).catch(() => {});
+        }
       }
 
       // Persist session id from response
