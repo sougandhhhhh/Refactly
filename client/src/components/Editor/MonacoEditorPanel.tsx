@@ -17,21 +17,7 @@ const languages = [
   { value: "php", label: "PHP" },
 ];
 
-export type MonacoEditorHandle = {
-  getCode: () => string;
-  setCode: (code: string) => void;
-  applyFix: (line: number, newCode: string) => void;
-};
-
-type MonacoEditorPanelProps = {
-  compact?: boolean;
-  code?: string;
-  language?: string;
-  onLanguageChange?: (lang: string) => void;
-  needsReview?: boolean;
-  onReviewClick?: () => void;
-  onCodeChange?: () => void;
-};
+export { languages, type MonacoEditorHandle, type MonacoEditorPanelProps };
 
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(
   ({ compact = false, code, language = "typescript", onLanguageChange, needsReview, onReviewClick, onCodeChange }, ref) => {

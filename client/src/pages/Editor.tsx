@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EditorToolbar } from "@/components/Editor/EditorToolbar";
 import type { MonacoEditorHandle } from "@/components/Editor/MonacoEditorPanel";
@@ -18,6 +18,91 @@ const MonacoEditorPanel = lazy(async () => {
 });
 
 const LS_LAST_SESSION = "refactly_last_session";
+
+const SAMPLE_CODES: Record<string, string> = {
+  python: `def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+print(greet("World"))`,
+  javascript: `function greet(name) {
+    return \`Hello, \${name}!\`;
+}
+
+console.log(greet("World"));`,
+  java: `public class Main {
+    public static void main(String[] args) {
+        System.out.println(greet("World"));
+    }
+
+    static String greet(String name) {
+        return "Hello, " + name + "!";
+    }
+}`,
+  cpp: `#include <iostream>
+#include <string>
+
+std::string greet(const std::string& name) {
+    return "Hello, " + name + "!";
+}
+
+int main() {
+    std::cout << greet("World") << std::endl;
+    return 0;
+}`,
+  c: `#include <stdio.h>
+#include <string.h>
+
+void greet(const char* name, char* out) {
+    sprintf(out, "Hello, %s!", name);
+}
+
+int main() {
+    char result[50];
+    greet("World", result);
+    printf("%s\\n", result);
+    return 0;
+}`,
+  typescript: `function greet(name: string): string {
+    return \`Hello, \${name}!\`;
+}
+
+console.log(greet("World"));`,
+  csharp: `using System;
+
+class Program {
+    static string Greet(string name) {
+        return $"Hello, {name}!";
+    }
+
+    static void Main() {
+        Console.WriteLine(Greet("World"));
+    }
+}`,
+  go: `package main
+
+import "fmt"
+
+func greet(name string) string {
+    return fmt.Sprintf("Hello, %s!", name)
+}
+
+func main() {
+    fmt.Println(greet("World"))
+}`,
+  rust: `fn greet(name: &str) -> String {
+    format!("Hello, {}!", name)
+}
+
+fn main() {
+    println!("{}", greet("World"));
+}`,
+  php: `<?php
+function greet(string $name): string {
+    return "Hello, $name!";
+}
+
+echo greet("World");`,
+};
 
 function getCodeKey(sid: string) {
   return `refactly_code_${sid}`;
@@ -95,6 +180,18 @@ export function EditorPage() {
     if (editorCode) editorRef.current?.setCode(editorCode);
   }, [editorCode, dbSessionId]);
 
+  const handleLanguageChange = useCallback((newLang: string) => {
+    const currentCode = editorRef.current?.getCode() || editorCode;
+    const oldSample = SAMPLE_CODES[language];
+    // If user is still on the old sample code, swap to new language's sample
+    if (oldSample && currentCode.trim() === oldSample.trim()) {
+      const newSample = SAMPLE_CODES[newLang] || "";
+      setEditorCode(newSample);
+      if (dbSessionId) localStorage.setItem(getCodeKey(dbSessionId), newSample);
+    }
+    setLanguage(newLang);
+  }, [language, editorCode, dbSessionId]);
+
   const handleCodeChange = useCallback(() => {
     setNeedsReview(true);
     const code = editorRef.current?.getCode() || "";
@@ -113,8 +210,8 @@ export function EditorPage() {
   };
 
   const handleNewSession = useCallback(() => {
-    const defaultCode = `# Write or paste your code here, then click "Review Code"\ndef greet(name: str) -> str:\n    return f"Hello, {name}!"\n`;
     const defaultLang = "python";
+    const defaultCode = SAMPLE_CODES[defaultLang];
     createSession({ language: defaultLang, code: defaultCode })
       .then((s) => {
         setDbSessionId(s.id);
@@ -214,7 +311,7 @@ export function EditorPage() {
               ref={editorRef}
               code={editorCode}
               language={language}
-              onLanguageChange={setLanguage}
+              onLanguageChange={handleLanguageChange}
               needsReview={needsReview}
               onReviewClick={handleReview}
               onCodeChange={handleCodeChange}
