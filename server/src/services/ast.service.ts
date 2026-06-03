@@ -24,6 +24,9 @@ export interface ASTResult {
   importCount: number;
 }
 
+// JS/TS languages that babel can parse
+const JS_LIKES = new Set(["javascript", "typescript", "jsx", "tsx"]);
+
 function calculateCyclomaticComplexity(path: t.Node): number {
   let complexity = 1;
   traverse(path as any, {
@@ -41,10 +44,89 @@ function calculateCyclomaticComplexity(path: t.Node): number {
   return complexity;
 }
 
+function analyzeByRegex(code: string, _language: string): ASTResult {
+  const nodes: ASTNode[] = [];
+  let fnCounter = 0, varCounter = 0, classCounter = 0, importCounter = 0;
+  const lines = code.split("\n");
+
+  // Detect function declarations
+  const fnRegex = /(?:def\s+|function\s+|fn\s+|func\s+|public\s+\w+\s+\w+\s*\(|private\s+\w+\s+\w+\s*\()(\w+)/g;
+  // Detect class declarations
+  const classRegex = /(?:class\s+)(\w+)/g;
+  // Detect imports
+  const importRegex = /(?:import\s+|using\s+|require\s*\(|#include\s+)/g;
+
+  let match: RegExpExecArray | null;
+  // Reset regex state
+  fnRegex.lastIndex = 0;
+  classRegex.lastIndex = 0;
+  importRegex.lastIndex = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Re-run regex on each line for simplicity
+    const fnMatch = line.match(fnRegex);
+    if (fnMatch) {
+      const nameMatch = line.match(/(?:def|function|fn|func)\s+(\w+)/) || line.match(/(?:public|private|protected)\s+\w+\s+(\w+)\s*\(/);
+      nodes.push({
+        id: `func_${fnCounter++}`,
+        type: "function",
+        name: nameMatch ? nameMatch[1] : `fn_${fnCounter}`,
+        line: i + 1,
+        complexity: 1,
+      });
+    }
+
+    const clsMatch = line.match(classRegex);
+    if (clsMatch) {
+      const nameMatch = line.match(/class\s+(\w+)/);
+      nodes.push({
+        id: `class_${classCounter++}`,
+        type: "class",
+        name: nameMatch ? nameMatch[1] : `class_${classCounter}`,
+        line: i + 1,
+      });
+    }
+
+    if (importRegex.test(line)) {
+      nodes.push({
+        id: `import_${importCounter++}`,
+        type: "import",
+        name: line.trim().slice(0, 50),
+        line: i + 1,
+      });
+    }
+
+    // Simple variable detection
+    const varMatch = line.match(/(?:let|var|const|int|String|bool|float|double)\s+(\w+)/);
+    if (varMatch) {
+      nodes.push({
+        id: `var_${varCounter++}`,
+        type: "variable",
+        name: varMatch[1],
+        line: i + 1,
+      });
+    }
+  }
+
+  return {
+    nodes,
+    edges: [],
+    cyclomaticComplexity: nodes.filter((n) => n.type === "function").length,
+    functionCount: fnCounter,
+    importCount: importCounter,
+  };
+}
+
 export function analyzeAST(code: string, language: string): ASTResult {
   const nodes: ASTNode[] = [];
   const edges: ASTEdge[] = [];
   const nodeIdMap = new Map<string, string>();
+
+  if (!JS_LIKES.has(language.toLowerCase())) {
+    return analyzeByRegex(code, language);
+  }
 
   let parsed;
   try {
@@ -54,7 +136,7 @@ export function analyzeAST(code: string, language: string): ASTResult {
       errorRecovery: true,
     });
   } catch {
-    return { nodes, edges, cyclomaticComplexity: 0, functionCount: 0, importCount: 0 };
+    return analyzeByRegex(code, language);
   }
 
   let functionIdCounter = 0;

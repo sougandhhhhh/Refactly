@@ -46,14 +46,14 @@ export function ComplexityPanel({ complexity, isLoading, error }: ComplexityPane
     <div className="space-y-6">
       <div className="card-old-money p-6">
         <p className="eyebrow">Complexity Profile</p>
-        <div className="mt-5 flex gap-8">
-          <div>
+        <div className="mt-5 flex items-center gap-6">
+          <div className="flex items-center gap-2">
             <p className="font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">Time</p>
-            <p className="font-display text-6xl text-charcoal-dark">{complexity.time}</p>
+            <p className="font-mono text-base text-charcoal-dark">{complexity.time}</p>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             <p className="font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">Space</p>
-            <p className="font-display text-6xl text-charcoal-dark">{complexity.space}</p>
+            <p className="font-mono text-base text-charcoal-dark">{complexity.space}</p>
           </div>
         </div>
         <p className="mt-4 text-lg text-charcoal-light">{complexity.explanation}</p>
