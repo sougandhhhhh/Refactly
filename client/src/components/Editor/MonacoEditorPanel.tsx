@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
@@ -25,6 +25,7 @@ export type MonacoEditorHandle = {
 
 type MonacoEditorPanelProps = {
   compact?: boolean;
+  code?: string;
   language?: string;
   onLanguageChange?: (lang: string) => void;
   needsReview?: boolean;
@@ -32,15 +33,15 @@ type MonacoEditorPanelProps = {
   onCodeChange?: () => void;
 };
 
-const DEFAULT_CODE = `# Write or paste your code here, then click "Review Code"
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
-`;
-
 export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPanelProps>(
-  ({ compact = false, language = "typescript", onLanguageChange, needsReview, onReviewClick, onCodeChange }, ref) => {
+  ({ compact = false, code, language = "typescript", onLanguageChange, needsReview, onReviewClick, onCodeChange }, ref) => {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
+
+    // Sync external code changes to the editor
+    useEffect(() => {
+      if (code !== undefined) editorRef.current?.setValue(code);
+    }, [code]);
 
     useImperativeHandle(ref, () => ({
       getCode: () => editorRef.current?.getValue() || "",
@@ -104,7 +105,6 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
           <Editor
             key={language}
             language={language}
-            defaultValue={DEFAULT_CODE}
             onMount={handleMount}
             onChange={() => onCodeChange?.()}
             options={{

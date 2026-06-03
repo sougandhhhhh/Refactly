@@ -17,6 +17,12 @@ const MonacoEditorPanel = lazy(async () => {
   return { default: module.MonacoEditorPanel };
 });
 
+const LS_LAST_SESSION = "refactly_last_session";
+
+function getCodeKey(sid: string) {
+  return `refactly_code_${sid}`;
+}
+
 function generateTitleFromCode(code: string): string {
   const lines = code.split("\n");
   for (const line of lines) {
@@ -45,9 +51,17 @@ export function EditorPage() {
   const [title, setTitle] = useState("Untitled Session");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [dbSessionId, setDbSessionId] = useState<string | null>(null);
+  const [editorCode, setEditorCode] = useState("");
   const editorRef = useRef<MonacoEditorHandle>(null);
   const titleRef = useRef(title);
   titleRef.current = title;
+  const codeRef = useRef(editorCode);
+  codeRef.current = editorCode;
+
+  // Persist last session id whenever dbSessionId changes
+  useEffect(() => {
+    if (dbSessionId) localStorage.setItem(LS_LAST_SESSION, dbSessionId);
+  }, [dbSessionId]);
 
   // Load or create session on mount
   useEffect(() => {
@@ -59,11 +73,15 @@ export function EditorPage() {
         })
         .catch(() => {/* silently fail */});
     } else {
+      // Restore code from localStorage
+      const saved = localStorage.getItem(getCodeKey(sessionId));
+      if (saved) setEditorCode(saved);
       fetchSession(sessionId)
         .then((s) => {
           setDbSessionId(s.id);
           setTitle(s.title || "Untitled Session");
           setLanguage(s.language);
+          if (s.code && !saved) setEditorCode(s.code);
         })
         .catch(() => {
           // Ephemeral or failed fetch — keep the id, use defaults
@@ -72,10 +90,26 @@ export function EditorPage() {
     }
   }, [sessionId]);
 
+  // Apply loaded code to editor when it becomes available
+  useEffect(() => {
+    if (editorCode) editorRef.current?.setCode(editorCode);
+  }, [editorCode, dbSessionId]);
+
+  const handleCodeChange = useCallback(() => {
+    setNeedsReview(true);
+    const code = editorRef.current?.getCode() || "";
+    setEditorCode(code);
+    if (dbSessionId) localStorage.setItem(getCodeKey(dbSessionId), code);
+  }, [dbSessionId]);
+
   const onFixApplied = (line: number, message: string) => {
     const key = `${line}-${message}`;
     setFixedKeys((prev) => new Set(prev).add(key));
     setNeedsReview(true);
+    // Save code after fix
+    const code = editorRef.current?.getCode() || "";
+    setEditorCode(code);
+    if (dbSessionId) localStorage.setItem(getCodeKey(dbSessionId), code);
   };
 
   const handleNewSession = useCallback(() => {
@@ -84,13 +118,13 @@ export function EditorPage() {
     createSession({ language: defaultLang, code: defaultCode })
       .then((s) => {
         setDbSessionId(s.id);
+        setEditorCode(defaultCode);
         setTitle("Untitled Session");
         setLanguage(defaultLang);
         setReviewResult(null);
         setReviewError(null);
         setFixedKeys(new Set());
         setNeedsReview(false);
-        editorRef.current?.setCode(defaultCode);
         navigate(`/editor/${s.id}`);
       })
       .catch(() => showOldMoneyToast("Failed to create new session"));
@@ -98,7 +132,7 @@ export function EditorPage() {
 
   const handleReview = async () => {
     setNeedsReview(false);
-    const code = editorRef.current?.getCode();
+    const code = editorRef.current?.getCode() || codeRef.current;
     if (!code) {
       showOldMoneyToast("No code to review.");
       return;
@@ -114,6 +148,7 @@ export function EditorPage() {
       // Persist session id from response
       if (result.sessionId && result.sessionId !== dbSessionId) {
         setDbSessionId(result.sessionId);
+        localStorage.setItem(getCodeKey(result.sessionId), code);
         navigate(`/editor/${result.sessionId}`, { replace: true });
       }
 
@@ -177,11 +212,12 @@ export function EditorPage() {
           >
             <MonacoEditorPanel
               ref={editorRef}
+              code={editorCode}
               language={language}
               onLanguageChange={setLanguage}
               needsReview={needsReview}
               onReviewClick={handleReview}
-              onCodeChange={() => setNeedsReview(true)}
+              onCodeChange={handleCodeChange}
             />
           </Suspense>
         </div>

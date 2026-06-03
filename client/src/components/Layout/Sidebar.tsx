@@ -5,8 +5,10 @@ import { SignOutDialog } from "@/components/common/SignOutDialog";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
+const LS_LAST_SESSION = "refactly_last_session";
+
 const items = [
-  { label: "Reviews", icon: Sparkles, href: "/editor/session-2048" },
+  { label: "Reviews", icon: Sparkles, href: "/editor/session-2048", dynamic: true },
   { label: "Overview", icon: LayoutGrid, href: "/overview" },
   { label: "Sessions", icon: ClipboardCheck, href: "/sessions" },
   { label: "Analytics", icon: BarChart3, href: "/analytics" },
@@ -57,8 +59,26 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </div>
         <div className={cn("mt-4 h-px w-full bg-charcoal-dark/15", collapsed && "w-8 mx-auto")} />
         <nav className={cn("mt-4 space-y-1", collapsed && "flex flex-col items-center")}>
-          {items.map(({ label, icon: Icon, href }) => {
+          {items.map(({ label, icon: Icon, href, dynamic }) => {
             const active = isActive(href);
+            if (dynamic) {
+              const lastSession = localStorage.getItem(LS_LAST_SESSION);
+              return (
+                <button
+                  key={label}
+                  onClick={() => navigate(lastSession ? `/editor/${lastSession}` : href)}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-sm px-3 py-3 font-body text-lg text-charcoal-dark/70 transition-all duration-200 hover:bg-charcoal-dark/10 hover:text-charcoal-dark",
+                    collapsed && "justify-center px-0",
+                    active && "bg-charcoal-dark/15 text-charcoal-dark font-medium",
+                  )}
+                  title={collapsed ? label : undefined}
+                >
+                  <Icon size={18} strokeWidth={1.6} />
+                  {!collapsed && <span>{label}</span>}
+                </button>
+              );
+            }
             return (
               <Link
                 key={label}

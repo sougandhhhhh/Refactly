@@ -11,30 +11,29 @@ function dbUnavailable(res: Response) {
 }
 
 export async function createSession(req: AuthRequest, res: Response) {
-  if (!process.env.DATABASE_URL) {
-    // Return a fake session id so the UI can proceed ephemerally
-    const { v4 } = await import("uuid");
-    return res.status(201).json({ id: `ephemeral-${v4()}`, title: req.body.title || "Untitled Session", language: req.body.language || "javascript", code: req.body.code || "", createdAt: new Date().toISOString() });
-  }
   try {
-    const prisma = await getPrisma();
-    const { v4 } = await import("uuid");
-    const { title, language, code } = req.body;
-    const session = await prisma.session.create({
-      data: {
-        title: title || "Untitled Session",
-        language: language || "javascript",
-        code: code || "",
-        ownerId: req.userId!,
-        shareToken: v4(),
-      },
-    });
-    await prisma.$disconnect();
-    res.status(201).json(session);
+    if (process.env.DATABASE_URL) {
+      const prisma = await getPrisma();
+      const { v4 } = await import("uuid");
+      const { title, language, code } = req.body;
+      const session = await prisma.session.create({
+        data: {
+          title: title || "Untitled Session",
+          language: language || "javascript",
+          code: code || "",
+          ownerId: req.userId!,
+          shareToken: v4(),
+        },
+      });
+      await prisma.$disconnect();
+      return res.status(201).json(session);
+    }
   } catch (error) {
-    console.error("Create session error:", error);
-    res.status(500).json({ error: "Failed to create session" });
+    console.warn("DB unavailable for createSession, falling back to ephemeral:", error instanceof Error ? error.message : error);
   }
+  // Fall back to ephemeral session
+  const { v4 } = await import("uuid");
+  res.status(201).json({ id: `ephemeral-${v4()}`, title: req.body.title || "Untitled Session", language: req.body.language || "javascript", code: req.body.code || "", createdAt: new Date().toISOString() });
 }
 
 export async function getSessions(req: AuthRequest, res: Response) {
@@ -87,7 +86,7 @@ export async function getSession(req: AuthRequest, res: Response) {
 }
 
 export async function updateSession(req: AuthRequest, res: Response) {
-  if (!process.env.DATABASE_URL) return dbUnavailable(res);
+  if (!process.env.DATABASE_URL) return res.json({ message: "No DB — skipped" });
   try {
     const prisma = await getPrisma();
     const id = req.params.id as string;
