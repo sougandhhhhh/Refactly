@@ -76,6 +76,10 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
       monaco.editor.defineTheme("old-money-theme", oldMoneyTheme);
       monaco.editor.setTheme("old-money-theme");
       if (code) editor.setValue(code);
+      // Ensure context menu actions work by keeping editor focused
+      editor.getContainerDomNode().addEventListener("contextmenu", () => {
+        setTimeout(() => editor.focus(), 0);
+      });
     };
 
     return (
@@ -120,6 +124,8 @@ export const MonacoEditorPanel = forwardRef<MonacoEditorHandle, MonacoEditorPane
               glyphMargin: false,
               folding: true,
               lineDecorationsWidth: 14,
+              contextmenu: true,
+              'semanticHighlighting.enabled': true,
             }}
           />
         </div>
