@@ -2,9 +2,10 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 
 type ScoreChartProps = {
   scoreHistory: Array<{ score: number; createdAt: string }>;
+  title?: string;
 };
 
-export function ScoreChart({ scoreHistory }: ScoreChartProps) {
+export function ScoreChart({ scoreHistory, title = "Score Graph" }: ScoreChartProps) {
   const chartData = scoreHistory.map((h) => ({
     label: new Date(h.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
     score: h.score,
@@ -22,7 +23,7 @@ export function ScoreChart({ scoreHistory }: ScoreChartProps) {
 
   return (
     <div className="card-old-money h-full p-6">
-      <h2 className="text-3xl text-charcoal-dark">Score Over Time</h2>
+      <h2 className="text-3xl text-charcoal-dark">{title}</h2>
       <div className="mt-6 h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>

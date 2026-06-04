@@ -51,7 +51,7 @@ export function SessionTable({ sessions, onDelete }: SessionTableProps) {
         <span>Action</span>
         <span />
       </div>
-      <div className="max-h-[340px] overflow-y-auto">
+      <div className="h-[440px] overflow-y-auto">
         <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
           {sessions.map((session) => (
             <motion.div

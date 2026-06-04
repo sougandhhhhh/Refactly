@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { LoaderCircle, BarChart3, Layers } from "lucide-react";
+import { LoaderCircle, BarChart3, Layers, CalendarDays } from "lucide-react";
 import { ScoreChart } from "@/components/Dashboard/ScoreChart";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { PageWrapper } from "@/components/Layout/PageWrapper";
@@ -31,9 +31,12 @@ function MiniStat({ label, value, suffix }: { label: string; value: number; suff
   );
 }
 
+type TimeRange = "7d" | "30d" | "90d" | "all";
+
 export function Analytics() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<TimeRange>("all");
 
   useEffect(() => {
     fetchDashboardStats()
@@ -41,6 +44,14 @@ export function Analytics() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const filteredHistory = useMemo(() => {
+    if (!stats) return [];
+    if (timeRange === "all") return stats.scoreHistory;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - parseInt(timeRange));
+    return stats.scoreHistory.filter((h) => new Date(h.createdAt) >= cutoff);
+  }, [stats, timeRange]);
 
   const distribution = useMemo(() => {
     if (!stats) return [];
@@ -53,9 +64,9 @@ export function Analytics() {
     ];
     return bins.map((bin) => ({
       ...bin,
-      count: stats.scoreHistory.filter((h) => h.score >= bin.min && h.score <= bin.max).length,
+      count: filteredHistory.filter((h) => h.score >= bin.min && h.score <= bin.max).length,
     }));
-  }, [stats]);
+  }, [filteredHistory]);
 
   const maxDistCount = useMemo(() => Math.max(...distribution.map((d) => d.count), 1), [distribution]);
   const maxLangCount = stats ? Math.max(...stats.languageBreakdown.map((l) => l.count), 1) : 1;
@@ -92,7 +103,26 @@ export function Analytics() {
             </div>
 
             <div className="mt-6">
-              <ScoreChart scoreHistory={stats!.scoreHistory} />
+              <div className="mb-3 flex items-center justify-between">
+                <div />
+                <div className="flex items-center gap-1 rounded-sm border border-stone-200 bg-[#FDFCF9] p-0.5">
+                  <CalendarDays size={14} className="ml-2 text-stone-400" />
+                  {(["7d", "30d", "90d", "all"] as const).map((range) => (
+                    <button
+                      key={range}
+                      onClick={() => setTimeRange(range)}
+                      className={`rounded-sm px-3 py-1 font-mono text-2xs uppercase tracking-[0.15em] transition-colors ${
+                        timeRange === range
+                          ? "bg-gold text-cream-50"
+                          : "text-stone-500 hover:text-charcoal-dark"
+                      }`}
+                    >
+                      {range === "all" ? "All Time" : range}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <ScoreChart scoreHistory={filteredHistory} title={`Score Graph (${filteredHistory.length} data points)`} />
             </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-2">

@@ -1,6 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
 import { FilePlus, LoaderCircle, Search, ArrowUpDown } from "lucide-react";
-import { SessionCard } from "@/components/Dashboard/SessionCard";
 import { SessionTable } from "@/components/Dashboard/SessionTable";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { PageWrapper } from "@/components/Layout/PageWrapper";
@@ -127,21 +126,6 @@ export function SessionsPage() {
             </div>
 
             <SessionTable sessions={filtered} onDelete={handleDelete} />
-
-            {filtered.length > 0 && (
-              <div className="mt-6 grid gap-5 md:grid-cols-2">
-                {filtered.slice(0, 2).map((session) => (
-                  <SessionCard
-                    key={session.id}
-                    id={session.id}
-                    name={session.title}
-                    language={session.language}
-                    score={session.score ?? 0}
-                    date={new Date(session.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                  />
-                ))}
-              </div>
-            )}
           </>
         )}
       </PageWrapper>
