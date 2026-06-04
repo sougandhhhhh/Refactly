@@ -129,6 +129,9 @@ export async function deleteSession(req: AuthRequest, res: Response) {
       return res.status(403).json({ error: "Not authorized" });
     }
 
+    // Delete child records first to avoid foreign key violations
+    await prisma.review.deleteMany({ where: { sessionId: id } });
+    await prisma.comment.deleteMany({ where: { sessionId: id } });
     await prisma.session.delete({ where: { id } });
     await prisma.$disconnect();
     res.json({ message: "Session deleted" });

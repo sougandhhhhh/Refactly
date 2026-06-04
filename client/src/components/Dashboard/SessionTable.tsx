@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
@@ -32,7 +33,7 @@ export function SessionTable({ sessions, onDelete }: SessionTableProps) {
       await deleteSession(id);
       onDelete?.(id);
     } catch {
-      /* silently fail */
+      toast.error("Failed to delete session");
     } finally {
       setDeleting(null);
     }
