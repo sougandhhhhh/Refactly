@@ -61,7 +61,9 @@ export function SessionTable({ sessions, onDelete }: SessionTableProps) {
             >
               <span className="truncate text-2xl text-charcoal-dark">{session.title}</span>
               <span className="font-elegant text-base text-charcoal-light">{session.language}</span>
-              <ScoreBadge score={session.score ?? 0} compact />
+              <div>
+                <ScoreBadge score={session.score ?? 0} compact />
+              </div>
               <span className="font-mono text-xs uppercase tracking-[0.14em] text-stone-500">
                 {new Date(session.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
               </span>
