@@ -12,12 +12,34 @@ router.get("/profile", async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.userId },
-      select: { id: true, email: true, name: true, avatar: true, createdAt: true },
+      select: { id: true, email: true, name: true, avatar: true, defaultLanguage: true, createdAt: true },
     });
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
+router.put("/profile", async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, defaultLanguage } = req.body;
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (defaultLanguage !== undefined) updateData.defaultLanguage = defaultLanguage;
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.userId },
+      data: updateData,
+      select: { id: true, email: true, name: true, avatar: true, defaultLanguage: true },
+    });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update profile" });
   }
 });
 

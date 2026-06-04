@@ -10,6 +10,7 @@ import { SecurityPanel } from "@/components/Review/SecurityPanel";
 import { showOldMoneyToast } from "@/components/common/Toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSession, fetchSession, triggerReview, updateSession, warmUpServer, type ReviewResult } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 
 const tabs = ["AI Review", "Security", "Complexity", "AST"] as const;
 const MonacoEditorPanel = lazy(async () => {
@@ -129,8 +130,10 @@ export function EditorPage() {
 
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [language, setLanguage] = useState("python");
+  const defaultLang = user?.defaultLanguage || "python";
+  const [language, setLanguage] = useState(defaultLang);
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [reviewResult, setReviewResult] = useState<ReviewResult | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
@@ -140,7 +143,7 @@ export function EditorPage() {
   const [title, setTitle] = useState("Untitled Session");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [dbSessionId, setDbSessionId] = useState<string | null>(null);
-  const [editorCode, setEditorCode] = useState(SAMPLE_CODES.python);
+  const [editorCode, setEditorCode] = useState(SAMPLE_CODES[defaultLang] || SAMPLE_CODES.python);
   const editorRef = useRef<MonacoEditorHandle>(null);
   const titleRef = useRef(title);
   titleRef.current = title;
@@ -214,9 +217,9 @@ export function EditorPage() {
   };
 
   const handleNewSession = useCallback(() => {
-    const defaultLang = "python";
-    const defaultCode = SAMPLE_CODES[defaultLang];
-    createSession({ language: defaultLang, code: defaultCode })
+    const newDefaultLang = user?.defaultLanguage || "python";
+    const newDefaultCode = SAMPLE_CODES[newDefaultLang] || SAMPLE_CODES.python;
+    createSession({ language: newDefaultLang, code: newDefaultCode })
       .then((s) => {
         setDbSessionId(s.id);
         setEditorCode(defaultCode);
@@ -229,7 +232,7 @@ export function EditorPage() {
         navigate(`/editor/${s.id}`);
       })
       .catch(() => showOldMoneyToast("Failed to create new session"));
-  }, [navigate]);
+  }, [navigate, user?.defaultLanguage]);
 
   const handleReview = async () => {
     setNeedsReview(false);

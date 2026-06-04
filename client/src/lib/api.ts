@@ -109,6 +109,17 @@ export type SessionData = {
   createdAt: string;
 };
 
+export async function updateProfile(data: { name?: string; defaultLanguage?: string }): Promise<{ id: string; email: string; name: string; avatar?: string | null; defaultLanguage: string }> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/user/profile`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Failed to update profile");
+  return res.json();
+}
+
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_URL}/user/stats`, { headers });
