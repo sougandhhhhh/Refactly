@@ -5,7 +5,7 @@ import { StatCard } from "@/components/common/StatCard";
 import { ScoreBadge } from "@/components/common/ScoreBadge";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { PageWrapper } from "@/components/Layout/PageWrapper";
-import { fetchDashboardStats, fetchSessions, type DashboardStats, type SessionData } from "@/lib/api";
+import { fetchDashboardStats, type DashboardStats } from "@/lib/api";
 
 const langColors: Record<string, string> = {
   javascript: "bg-gold", js: "bg-gold", jsx: "bg-gold",
@@ -28,12 +28,11 @@ function LangDot({ language }: { language: string }) {
 
 export function Overview() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchDashboardStats(), fetchSessions()])
-      .then(([s, sess]) => { setStats(s); setSessions(sess); })
+    fetchDashboardStats()
+      .then(setStats)
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -96,7 +95,7 @@ export function Overview() {
                     Recent Activity
                   </h2>
                 </div>
-                <div className="divide-y divide-stone-200">
+                <div className="max-h-[340px] overflow-y-auto divide-y divide-stone-200">
                   {stats!.recentActivity.length === 0 ? (
                     <p className="px-6 py-8 font-elegant text-xl italic text-charcoal-light">No sessions yet.</p>
                   ) : (
@@ -153,7 +152,7 @@ export function Overview() {
               </div>
             </div>
 
-            {sessions.length > 0 && (
+            {stats!.totalReviews > 0 && (
               <div className="mt-8">
                 <div className="card-old-money">
                   <div className="border-b border-stone-200 px-6 py-5">
@@ -163,22 +162,16 @@ export function Overview() {
                     </h2>
                   </div>
                   <div className="grid gap-px bg-stone-200 sm:grid-cols-3">
-                    {(() => {
-                      const scored = sessions.filter((s) => s.score !== undefined && s.score !== null);
-                      const best = scored.length > 0 ? Math.max(...scored.map((s) => s.score!)) : 0;
-                      const avg = scored.length > 0 ? Math.round(scored.reduce((a, s) => a + s.score!, 0) / scored.length) : 0;
-                      const worst = scored.length > 0 ? Math.min(...scored.map((s) => s.score!)) : 0;
-                      return [
-                        { label: "Highest Score", value: best },
-                        { label: "Average Score", value: avg },
-                        { label: "Lowest Score", value: worst },
-                      ].map((item) => (
-                        <div key={item.label} className="bg-[#FDFCF9] px-6 py-5">
-                          <p className="font-mono text-2xs uppercase tracking-[0.22em] text-stone-500">{item.label}</p>
-                          <p className="mt-2 font-display text-3xl text-charcoal-dark">{item.value}<span className="ml-0.5 font-mono text-sm text-stone-400">/100</span></p>
-                        </div>
-                      ));
-                    })()}
+                    {[
+                      { label: "Highest Score", value: stats!.bestScore },
+                      { label: "Average Score", value: stats!.averageScore },
+                      { label: "Lowest Score", value: stats!.worstScore },
+                    ].map((item) => (
+                      <div key={item.label} className="bg-[#FDFCF9] px-6 py-5">
+                        <p className="font-mono text-2xs uppercase tracking-[0.22em] text-stone-500">{item.label}</p>
+                        <p className="mt-2 font-display text-3xl text-charcoal-dark">{item.value}<span className="ml-0.5 font-mono text-sm text-stone-400">/100</span></p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
