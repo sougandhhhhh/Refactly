@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { PageWrapper } from "@/components/Layout/PageWrapper";
 import { SignOutDialog } from "@/components/common/SignOutDialog";
@@ -8,6 +8,16 @@ import { supabase } from "@/lib/supabase";
 import { languages } from "@/components/Editor/MonacoEditorPanel";
 import { setPassword as apiSetPassword } from "@/lib/api";
 import { Eye, EyeOff } from "lucide-react";
+
+function getPasswordStrength(password: string) {
+  let score = 0;
+  if (password.length >= 8) score += 1;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1;
+  if (/\d/.test(password) || /[^A-Za-z0-9]/.test(password)) score += 1;
+  if (score <= 1) return "weak";
+  if (score === 2) return "medium";
+  return "strong";
+}
 
 export function Settings() {
   const { user, isGoogleUser, updateUser } = useAuth();
@@ -32,6 +42,7 @@ export function Settings() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const strength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
 
   useEffect(() => {
     if (user?.name) setDisplayName(user.name);
@@ -213,6 +224,22 @@ export function Settings() {
                   {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {newPassword.length > 0 && (
+                <div className="mt-2 flex items-center justify-end gap-2">
+                  <span className="font-mono text-2xs uppercase tracking-[0.16em] text-stone-500">Strength</span>
+                  <span
+                    className={`rounded-sm px-2 py-0.5 font-mono text-2xs uppercase tracking-[0.12em] ${
+                      strength === "strong"
+                        ? "bg-green-100 text-green-700"
+                        : strength === "medium"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {strength}
+                  </span>
+                </div>
+              )}
             </div>
             <div>
               <label className="block font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">Confirm New Password</label>
