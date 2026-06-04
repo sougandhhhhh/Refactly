@@ -64,8 +64,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   key={label}
                   onClick={() => navigate(lastSession ? `/editor/${lastSession}` : href)}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-sm px-3 py-3 font-body text-lg text-charcoal-dark/70 transition-all duration-200 hover:bg-charcoal-dark/10 hover:text-charcoal-dark",
-                    collapsed && "justify-center px-0",
+                    "flex items-center gap-3 rounded-sm font-body text-lg text-charcoal-dark/70 transition-all duration-200 hover:bg-charcoal-dark/10 hover:text-charcoal-dark",
+                    collapsed ? "h-10 w-10 justify-center p-0" : "w-full px-3 py-3",
                     active && "bg-charcoal-dark/15 text-charcoal-dark font-medium",
                   )}
                   title={collapsed ? label : undefined}
@@ -80,8 +80,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 key={label}
                 to={href}
                 className={cn(
-                  "flex items-center gap-3 rounded-sm px-3 py-3 font-body text-lg text-charcoal-dark/70 transition-all duration-200 hover:bg-charcoal-dark/10 hover:text-charcoal-dark",
-                  collapsed && "justify-center px-0",
+                  "flex items-center gap-3 rounded-sm font-body text-lg text-charcoal-dark/70 transition-all duration-200 hover:bg-charcoal-dark/10 hover:text-charcoal-dark",
+                  collapsed ? "h-10 w-10 justify-center p-0" : "w-full px-3 py-3",
                   active && "bg-charcoal-dark/15 text-charcoal-dark font-medium",
                 )}
                 title={collapsed ? label : undefined}
