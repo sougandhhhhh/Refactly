@@ -6,6 +6,7 @@ import { showOldMoneyToast } from "@/components/common/Toast";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { languages } from "@/components/Editor/MonacoEditorPanel";
+import { Eye, EyeOff } from "lucide-react";
 
 export function Settings() {
   const { user, isGoogleUser, updateUser } = useAuth();
@@ -27,6 +28,9 @@ export function Settings() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (user?.name) setDisplayName(user.name);
@@ -168,36 +172,66 @@ export function Settings() {
             {!isGoogleUser && (
               <div>
                 <label className="block font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">Current Password</label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="mt-1 w-full rounded-sm border border-stone-200 bg-[#FDFCF9] px-3 py-2 font-elegant text-lg text-charcoal-dark outline-none transition-colors focus:border-gold"
-                  placeholder="Enter current password"
-                />
+                <div className="relative mt-1">
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full rounded-sm border border-stone-200 bg-[#FDFCF9] px-3 py-2 pr-10 font-elegant text-lg text-charcoal-dark outline-none transition-colors focus:border-gold"
+                    placeholder="Enter current password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-charcoal-dark"
+                    tabIndex={-1}
+                  >
+                    {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
             )}
             <div>
               <label className="block font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
                 {isGoogleUser ? "New Password" : "New Password"}
               </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 w-full rounded-sm border border-stone-200 bg-[#FDFCF9] px-3 py-2 font-elegant text-lg text-charcoal-dark outline-none transition-colors focus:border-gold"
-                placeholder="Min. 6 characters"
-              />
+              <div className="relative mt-1">
+                <input
+                  type={showNew ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full rounded-sm border border-stone-200 bg-[#FDFCF9] px-3 py-2 pr-10 font-elegant text-lg text-charcoal-dark outline-none transition-colors focus:border-gold"
+                  placeholder="Min. 6 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-charcoal-dark"
+                  tabIndex={-1}
+                >
+                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">Confirm New Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 w-full rounded-sm border border-stone-200 bg-[#FDFCF9] px-3 py-2 font-elegant text-lg text-charcoal-dark outline-none transition-colors focus:border-gold"
-                placeholder="Re-enter new password"
-              />
+              <div className="relative mt-1">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full rounded-sm border border-stone-200 bg-[#FDFCF9] px-3 py-2 pr-10 font-elegant text-lg text-charcoal-dark outline-none transition-colors focus:border-gold"
+                  placeholder="Re-enter new password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-charcoal-dark"
+                  tabIndex={-1}
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           </div>
           <div className="mt-5 flex justify-end">
