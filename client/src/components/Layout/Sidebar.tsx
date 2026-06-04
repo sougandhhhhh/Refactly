@@ -101,10 +101,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <img
               src={user.image}
               alt={userName}
-              className="h-9 w-9 shrink-0 rounded-sm border border-charcoal-dark/30 object-cover"
+              className={cn("h-9 w-9 shrink-0 rounded-sm border border-charcoal-dark/30 object-cover transition-all duration-200", collapsed && "hover:bg-charcoal-dark/10")}
+              title={collapsed ? userName : undefined}
             />
           ) : (
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-charcoal-dark/20 font-mono text-xs uppercase text-charcoal-dark">
+            <div
+              className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-charcoal-dark/20 font-mono text-xs uppercase text-charcoal-dark transition-all duration-200", collapsed && "hover:bg-charcoal-dark/30")}
+              title={collapsed ? userName : undefined}
+            >
               {initials || "?"}
             </div>
           )}
