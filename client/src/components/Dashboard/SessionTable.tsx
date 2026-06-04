@@ -10,7 +10,7 @@ import { deleteSession, type SessionData } from "@/lib/api";
 
 type SessionTableProps = {
   sessions: SessionData[];
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
 };
 
 export function SessionTable({ sessions, onDelete }: SessionTableProps) {
@@ -30,7 +30,7 @@ export function SessionTable({ sessions, onDelete }: SessionTableProps) {
     setDeleting(id);
     try {
       await deleteSession(id);
-      onDelete(id);
+      onDelete?.(id);
     } catch {
       /* silently fail */
     } finally {

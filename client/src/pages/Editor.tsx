@@ -222,9 +222,9 @@ export function EditorPage() {
     createSession({ language: newDefaultLang, code: newDefaultCode })
       .then((s) => {
         setDbSessionId(s.id);
-        setEditorCode(defaultCode);
+        setEditorCode(newDefaultCode);
         setTitle("Untitled Session");
-        setLanguage(defaultLang);
+        setLanguage(newDefaultLang);
         setReviewResult(null);
         setReviewError(null);
         setFixedKeys(new Set());
