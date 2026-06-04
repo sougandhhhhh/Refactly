@@ -1,5 +1,5 @@
 import { forceCenter, forceLink, forceManyBody, forceSimulation } from "d3";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -42,13 +42,11 @@ export function ASTViewer({ ast, isLoading, error }: ASTViewerProps) {
   const [activeNode, setActiveNode] = useState<GraphNode | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!ast || !hostRef.current) return;
-
-    const width = hostRef.current.clientWidth || 340;
+  const startSimulation = useCallback((container: HTMLDivElement) => {
+    const width = container.clientWidth || 340;
     const height = 260;
-    const graphNodes = ast.nodes.map((n) => ({ ...n, type: n.type })) as GraphNode[];
-    const graphLinks = ast.edges.map((e) => ({ source: e.source, target: e.target }));
+    const graphNodes = ast!.nodes.map((n) => ({ ...n, type: n.type })) as GraphNode[];
+    const graphLinks = ast!.edges.map((e) => ({ source: e.source, target: e.target }));
 
     const simulation = forceSimulation(graphNodes)
       .force("charge", forceManyBody().strength(-120))
@@ -58,8 +56,26 @@ export function ASTViewer({ ast, isLoading, error }: ASTViewerProps) {
         setNodes([...graphNodes]);
       });
 
-    return () => { simulation.stop(); };
+    return simulation;
   }, [ast]);
+
+  useEffect(() => {
+    if (!ast || !hostRef.current) return;
+    const container = hostRef.current;
+    const simulation = startSimulation(container);
+
+    const observer = new ResizeObserver(() => {
+      const w = container.clientWidth || 340;
+      simulation.force("center", forceCenter(w / 2, 260 / 2));
+      simulation.alpha(0.3).restart();
+    });
+    observer.observe(container);
+
+    return () => {
+      simulation.stop();
+      observer.disconnect();
+    };
+  }, [ast, startSimulation]);
 
   if (isLoading) {
     return (
@@ -96,10 +112,12 @@ export function ASTViewer({ ast, isLoading, error }: ASTViewerProps) {
         {ast.cyclomaticComplexity} cyclomatic complexity &middot; {ast.functionCount} functions &middot; {ast.importCount} imports
       </p>
       <div ref={hostRef} className="mt-6">
-        <svg viewBox="0 0 360 260" className="w-full">
-          {ast.edges.map((link, i) => {
-            const source = nodes.find((n) => n.id === link.source);
-            const target = nodes.find((n) => n.id === link.target);
+        <svg viewBox={`0 0 ${hostRef.current?.clientWidth || 360} 260`} className="w-full">
+          {(nodes.length > 0 ? ast.edges : []).map((link, i) => {
+            const sourceId = typeof link.source === "object" ? (link.source as any).id : link.source;
+            const targetId = typeof link.target === "object" ? (link.target as any).id : link.target;
+            const source = nodes.find((n) => n.id === sourceId);
+            const target = nodes.find((n) => n.id === targetId);
             if (!source || !target) return null;
             return (
               <line
@@ -128,7 +146,7 @@ export function ASTViewer({ ast, isLoading, error }: ASTViewerProps) {
                     <rect x="-16" y="-16" width="32" height="32" fill={fill} />;
               })()}
               <text y="34" textAnchor="middle" fontFamily="JetBrains Mono" fontSize="9" fill="#6B6460">
-                {node.name.replace(/^.*\s/, "")}
+                {node.type === "import" ? node.name.split(" from ")[0] : node.name}
               </text>
             </g>
           ))}

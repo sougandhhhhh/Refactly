@@ -4,7 +4,7 @@ import * as t from "@babel/types";
 
 export interface ASTNode {
   id: string;
-  type: "function" | "variable" | "import" | "class";
+  type: "function" | "variable" | "import" | "class" | "module";
   name: string;
   line: number;
   complexity?: number;
@@ -70,23 +70,25 @@ function analyzeByRegex(code: string, _language: string): ASTResult {
     if (fnMatch) {
       const nameMatch = line.match(/(?:def|function|fn|func)\s+(\w+)/) || line.match(/(?:public|private|protected)\s+\w+\s+(\w+)\s*\(/);
       nodes.push({
-        id: `func_${fnCounter++}`,
+        id: `func_${fnCounter}`,
         type: "function",
         name: nameMatch ? nameMatch[1] : `fn_${fnCounter}`,
         line: i + 1,
         complexity: 1,
       });
+      fnCounter++;
     }
 
     const clsMatch = line.match(classRegex);
     if (clsMatch) {
       const nameMatch = line.match(/class\s+(\w+)/);
       nodes.push({
-        id: `class_${classCounter++}`,
+        id: `class_${classCounter}`,
         type: "class",
         name: nameMatch ? nameMatch[1] : `class_${classCounter}`,
         line: i + 1,
       });
+      classCounter++;
     }
 
     if (importRegex.test(line)) {
@@ -143,6 +145,9 @@ export function analyzeAST(code: string, language: string): ASTResult {
   let varIdCounter = 0;
   let importIdCounter = 0;
   let classIdCounter = 0;
+  let moduleIdCounter = 0;
+  const moduleNodes = new Map<string, string>();
+  const seenEdges = new Set<string>();
 
   traverse(parsed, {
     FunctionDeclaration(path) {
@@ -199,6 +204,17 @@ export function analyzeAST(code: string, language: string): ASTResult {
     },
     ImportDeclaration(path) {
       const source = path.node.source.value;
+      let moduleId = moduleNodes.get(source);
+      if (!moduleId) {
+        moduleId = `module_${moduleIdCounter++}`;
+        moduleNodes.set(source, moduleId);
+        nodes.push({
+          id: moduleId,
+          type: "module",
+          name: source,
+          line: path.node.loc?.start.line || 0,
+        });
+      }
       for (const specifier of path.node.specifiers) {
         const name = specifier.local.name;
         const id = `import_${importIdCounter++}`;
@@ -210,7 +226,7 @@ export function analyzeAST(code: string, language: string): ASTResult {
         });
         edges.push({
           source: id,
-          target: `module_${source}`,
+          target: moduleId,
           relation: "imports",
         });
       }
@@ -239,11 +255,15 @@ export function analyzeAST(code: string, language: string): ASTResult {
             }
             const parentId = nodeIdMap.get(parentName);
             if (parentId) {
-              edges.push({
-                source: parentId,
-                target: targetId,
-                relation: "calls",
-              });
+              const edgeKey = `${parentId}:${targetId}`;
+              if (!seenEdges.has(edgeKey)) {
+                seenEdges.add(edgeKey);
+                edges.push({
+                  source: parentId,
+                  target: targetId,
+                  relation: "calls",
+                });
+              }
             }
           }
         }
