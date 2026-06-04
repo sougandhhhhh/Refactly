@@ -22,34 +22,36 @@ export function SessionTable({ sessions }: SessionTableProps) {
   return (
     <div className="card-old-money overflow-hidden">
       <div className="border-b border-stone-200 px-6 py-5">
-        <h2 className="text-3xl text-charcoal-dark">Recent Sessions</h2>
+        <h2 className="text-3xl text-charcoal-dark">Lifetime Sessions</h2>
       </div>
-      <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
-        <div className="grid grid-cols-[2fr_0.9fr_0.8fr_0.9fr_0.7fr] border-b border-stone-200 px-6 py-3 font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
-          <span>Session Name</span>
-          <span>Language</span>
-          <span>Score</span>
-          <span>Date</span>
-          <span>Action</span>
-        </div>
-        {sessions.map((session) => (
-          <motion.div
-            key={session.id}
-            variants={staggerItem}
-            className="grid grid-cols-[2fr_0.9fr_0.8fr_0.9fr_0.7fr] items-center border-b border-stone-200 px-6 py-4 text-lg transition-colors duration-300 hover:bg-cream-100"
-          >
-            <span className="text-2xl text-charcoal-dark">{session.title}</span>
-            <span>{session.language}</span>
-            <ScoreBadge score={session.score ?? 0} />
-            <span className="font-mono text-sm uppercase tracking-[0.14em] text-stone-500">
-              {new Date(session.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-            </span>
-            <Link to={`/editor/${session.id}`} className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
-              Open
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
+      <div className="grid grid-cols-[2fr_0.8fr_1.1fr_1fr_0.6fr] border-b border-stone-200 px-6 py-3 font-mono text-2xs uppercase tracking-[0.18em] text-stone-500">
+        <span>Session Name</span>
+        <span>Language</span>
+        <span>Score</span>
+        <span>Date</span>
+        <span>Action</span>
+      </div>
+      <div className="max-h-[340px] overflow-y-auto">
+        <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
+          {sessions.map((session) => (
+            <motion.div
+              key={session.id}
+              variants={staggerItem}
+              className="grid grid-cols-[2fr_0.8fr_1.1fr_1fr_0.6fr] items-center border-b border-stone-200 px-6 py-3.5 text-lg transition-colors duration-300 hover:bg-cream-100"
+            >
+              <span className="truncate text-2xl text-charcoal-dark">{session.title}</span>
+              <span className="font-elegant text-base text-charcoal-light">{session.language}</span>
+              <ScoreBadge score={session.score ?? 0} compact />
+              <span className="font-mono text-xs uppercase tracking-[0.14em] text-stone-500">
+                {new Date(session.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+              </span>
+              <Link to={`/editor/${session.id}`} className="font-mono text-xs uppercase tracking-[0.18em] text-gold hover:text-gold-light">
+                Open
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
     </div>
   );
 }

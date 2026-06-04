@@ -120,7 +120,14 @@ export async function fetchSessions(): Promise<SessionData[]> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_URL}/sessions`, { headers });
   if (!res.ok) throw new Error("Failed to fetch sessions");
-  return res.json();
+  const data = await res.json();
+  return data.map((s: any) => ({
+    id: s.id,
+    title: s.title,
+    language: s.language,
+    score: s.reviews?.[0]?.score ?? undefined,
+    createdAt: s.createdAt,
+  }));
 }
 
 export async function createSession(data?: { title?: string; language?: string; code?: string }): Promise<{ id: string }> {
