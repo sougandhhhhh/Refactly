@@ -122,7 +122,7 @@ export function Analytics() {
                   ))}
                 </div>
               </div>
-              <ScoreChart scoreHistory={filteredHistory} title={`Score Graph (${filteredHistory.length} data points)`} />
+              <ScoreChart scoreHistory={filteredHistory} title="Score Graph" />
             </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
