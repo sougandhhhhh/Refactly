@@ -50,6 +50,10 @@ export function SessionsPage() {
     return result;
   }, [sessions, search, sort, langFilter]);
 
+  const handleDelete = (id: string) => {
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+  };
+
   const handleNewSession = () => {
     createSession()
       .then((s) => { window.location.href = `/editor/${s.id}`; })
@@ -122,7 +126,7 @@ export function SessionsPage() {
               </p>
             </div>
 
-            <SessionTable sessions={filtered} />
+            <SessionTable sessions={filtered} onDelete={handleDelete} />
 
             {filtered.length > 0 && (
               <div className="mt-6 grid gap-5 md:grid-cols-2">

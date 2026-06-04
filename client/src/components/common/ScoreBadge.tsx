@@ -16,7 +16,7 @@ export function ScoreBadge({ score, compact }: ScoreBadgeProps) {
   return (
     <span className={cn(
       "rounded-sm border-2 font-mono uppercase",
-      compact ? "px-1.5 py-0.5 text-[10px] leading-none" : "score-badge border-2",
+      compact ? "px-1 py-0.5 text-[9px] leading-none" : "score-badge border-2",
       tone,
     )}>
       {score}/100

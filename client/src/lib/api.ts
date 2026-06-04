@@ -141,6 +141,15 @@ export async function createSession(data?: { title?: string; language?: string; 
   return res.json();
 }
 
+export async function deleteSession(id: string): Promise<void> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/sessions/${id}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!res.ok) throw new Error("Failed to delete session");
+}
+
 export async function updateSession(id: string, data: { title?: string; language?: string; code?: string }): Promise<void> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_URL}/sessions/${id}`, {
