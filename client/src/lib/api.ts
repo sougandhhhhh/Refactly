@@ -76,11 +76,29 @@ export type ReviewResult = {
   };
 };
 
+export type RecentActivityItem = {
+  id: string;
+  title: string;
+  language: string;
+  score: number | null;
+  createdAt: string;
+};
+
+export type LanguageBreakdownItem = {
+  language: string;
+  count: number;
+};
+
 export type DashboardStats = {
   totalSessions: number;
   totalReviews: number;
   averageScore: number;
+  bestScore: number;
+  worstScore: number;
+  totalIssues: number;
   scoreHistory: Array<{ score: number; createdAt: string }>;
+  recentActivity: RecentActivityItem[];
+  languageBreakdown: LanguageBreakdownItem[];
 };
 
 export type SessionData = {
