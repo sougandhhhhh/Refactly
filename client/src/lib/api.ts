@@ -120,6 +120,16 @@ export async function updateProfile(data: { name?: string; defaultLanguage?: str
   return res.json();
 }
 
+export async function setPassword(password: string): Promise<void> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${API_URL}/auth/set-password`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ password }),
+  });
+  if (!res.ok) throw new Error("Failed to set password");
+}
+
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API_URL}/user/stats`, { headers });

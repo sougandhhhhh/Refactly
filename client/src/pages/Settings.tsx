@@ -6,6 +6,7 @@ import { showOldMoneyToast } from "@/components/common/Toast";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { languages } from "@/components/Editor/MonacoEditorPanel";
+import { setPassword as apiSetPassword } from "@/lib/api";
 import { Eye, EyeOff } from "lucide-react";
 
 export function Settings() {
@@ -72,13 +73,13 @@ export function Settings() {
           return;
         }
       }
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
+      await apiSetPassword(newPassword);
       showOldMoneyToast("Password updated successfully.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch {
+    } catch (e) {
+      console.error("Password update error:", e);
       showOldMoneyToast("Failed to update password.");
     } finally {
       setIsUpdatingPassword(false);
