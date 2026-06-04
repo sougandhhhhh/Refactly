@@ -21,7 +21,7 @@ export function Footer() {
           </div>
         </div>
         <p className="pt-6 font-mono text-2xs uppercase tracking-[0.18em] text-cream-50/55">
-          Copyright 2026 Refactly. Quietly opinionated engineering.
+          Copyright 2026 Refactly. Spectral rights reserved.
         </p>
       </div>
     </footer>
