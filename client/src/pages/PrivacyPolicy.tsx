@@ -9,7 +9,7 @@ export function PrivacyPolicy() {
 
   return (
     <PageWrapper>
-      <div className="cross-rule min-h-screen">
+      <div className="cross-rule paper-grid min-h-screen">
         <div className="mx-auto max-w-4xl px-6 pb-24 pt-24 md:px-10">
           <div className="flex items-center justify-between">
             <Link to="/" aria-label="Refactly home" className="inline-block">
